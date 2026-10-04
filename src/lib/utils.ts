@@ -27,6 +27,29 @@ export function generateOrderNumber(): string {
   return `CDC${y}${m}${d}-${random}`;
 }
 
+export function toDateSafe(value: unknown): Date | null {
+  if (!value) return null;
+
+  let date: Date;
+
+  if (value instanceof Date) {
+    date = value;
+  } else if (
+    typeof value === 'object' &&
+    value !== null &&
+    'toDate' in value &&
+    typeof (value as { toDate?: unknown }).toDate === 'function'
+  ) {
+    date = (value as { toDate: () => Date }).toDate();
+  } else if (typeof value === 'string' || typeof value === 'number') {
+    date = new Date(value);
+  } else {
+    return null;
+  }
+
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 export function formatDateIndo(dateStr: string | Date | undefined): string {
   if (!dateStr) return '-';
   const d = typeof dateStr === 'string' ? new Date(dateStr) : dateStr;

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { collection, query, onSnapshot, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { Order, UserProfile } from '../../types';
-import { formatRupiah, formatDateIndo } from '../../lib/utils';
+import { formatRupiah, formatDateIndo, toDateSafe } from '../../lib/utils';
 import { OrderStatusBadge, PaymentStatusBadge } from '../../components/common/OrderBadge';
 import {
   ShoppingBag,
@@ -35,7 +35,10 @@ export const AdminDashboardPage: React.FC = () => {
           id: doc.id,
           ...doc.data(),
         })) as Order[];
-        list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        list.sort((a, b) =>
+          (toDateSafe(b.createdAt)?.getTime() ?? 0) -
+          (toDateSafe(a.createdAt)?.getTime() ?? 0)
+        );
         setOrders(list);
         setLoading(false);
       },
