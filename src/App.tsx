@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Outlet, Navigate } from 'react-router-dom
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { NotificationProvider } from './context/NotificationContext';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
@@ -47,49 +48,51 @@ const PublicLayout: React.FC = () => {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <NotificationProvider>
-        <AuthProvider>
-          <CartProvider>
-            <Routes>
-              {/* Public & Customer Routes with Navbar & Footer */}
-              <Route element={<PublicLayout />}>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/menu" element={<MenuPage />} />
-                <Route path="/checkout" element={<CheckoutPage />} />
-                <Route path="/pesanan" element={<OrdersPage />} />
-                <Route path="/pesanan/:orderId" element={<OrderDetailPage />} />
-                <Route path="/profil" element={<ProfilePage />} />
-                <Route path="/poin" element={<PointsPage />} />
-                <Route path="/member" element={<MemberPage />} />
-                <Route path="/chat" element={<ChatPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-              </Route>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <NotificationProvider>
+          <AuthProvider>
+            <CartProvider>
+              <Routes>
+                {/* Public & Customer Routes with Navbar & Footer */}
+                <Route element={<PublicLayout />}>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/menu" element={<MenuPage />} />
+                  <Route path="/checkout" element={<CheckoutPage />} />
+                  <Route path="/pesanan" element={<OrdersPage />} />
+                  <Route path="/pesanan/:orderId" element={<OrderDetailPage />} />
+                  <Route path="/profil" element={<ProfilePage />} />
+                  <Route path="/poin" element={<PointsPage />} />
+                  <Route path="/member" element={<MemberPage />} />
+                  <Route path="/chat" element={<ChatPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                </Route>
 
-              {/* Secret Crew Gate Entry */}
-              <Route path="/admingatsu" element={<AdminEntryPage />} />
+                {/* Secret Crew Gate Entry */}
+                <Route path="/admingatsu" element={<AdminEntryPage />} />
 
-              {/* Protected Admin Routes */}
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<AdminDashboardPage />} />
-                <Route path="orders" element={<AdminOrdersPage />} />
-                <Route path="orders/:orderId" element={<AdminOrderDetailPage />} />
-                <Route path="members" element={<AdminMembersPage />} />
-                <Route path="members/:memberId" element={<AdminMembersPage />} />
-                <Route path="products" element={<AdminProductsPage />} />
-                <Route path="promotions" element={<AdminPromotionsPage />} />
-                <Route path="chat" element={<AdminChatPage />} />
-                <Route path="points" element={<AdminPointsPage />} />
-                <Route path="reports" element={<AdminReportsPage />} />
-              </Route>
+                {/* Protected Admin Routes */}
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<AdminDashboardPage />} />
+                  <Route path="orders" element={<AdminOrdersPage />} />
+                  <Route path="orders/:orderId" element={<AdminOrderDetailPage />} />
+                  <Route path="members" element={<AdminMembersPage />} />
+                  <Route path="members/:memberId" element={<AdminMembersPage />} />
+                  <Route path="products" element={<AdminProductsPage />} />
+                  <Route path="promotions" element={<AdminPromotionsPage />} />
+                  <Route path="chat" element={<AdminChatPage />} />
+                  <Route path="points" element={<AdminPointsPage />} />
+                  <Route path="reports" element={<AdminReportsPage />} />
+                </Route>
 
-              {/* Catch-all redirect to homepage */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </CartProvider>
-        </AuthProvider>
-      </NotificationProvider>
-    </BrowserRouter>
+                {/* Catch-all redirect to homepage */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </CartProvider>
+          </AuthProvider>
+        </NotificationProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
