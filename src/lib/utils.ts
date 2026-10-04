@@ -50,10 +50,10 @@ export function toDateSafe(value: unknown): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-export function formatDateIndo(dateStr: string | Date | undefined): string {
-  if (!dateStr) return '-';
-  const d = typeof dateStr === 'string' ? new Date(dateStr) : dateStr;
-  if (isNaN(d.getTime())) return '-';
+export function formatDateIndo(dateValue: unknown): string {
+  const d = toDateSafe(dateValue);
+  if (!d) return '-';
+
   return new Intl.DateTimeFormat('id-ID', {
     dateStyle: 'medium',
     timeStyle: 'short',
