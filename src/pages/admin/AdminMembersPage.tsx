@@ -5,6 +5,7 @@ import { UserProfile, PointTransaction, Order } from '../../types';
 import { formatRupiah, pointsToRupiah, generateOrderNumber } from '../../lib/utils';
 import { useNotification } from '../../context/NotificationContext';
 import { useAuth } from '../../context/AuthContext';
+import { MemberQrScanner } from '../../components/admin/MemberQrScanner';
 import {
   Users,
   Search,
@@ -281,6 +282,17 @@ export const AdminMembersPage: React.FC = () => {
     }
   };
 
+  const handleMemberQrCode = (code: string) => {
+    const normalized = code.trim().toLowerCase();
+    const found = members.find((member) => member.memberId?.trim().toLowerCase() === normalized);
+    if (!found) {
+      showToast(`Member ID ${code} tidak ditemukan.`, 'error', 'QR Member Tidak Dikenal');
+      return;
+    }
+    setSearchTerm(found.memberId);
+    showToast(`${found.name} (${found.memberId}) ditemukan. Silakan pilih aksi kasir.`, 'success', 'Member Ditemukan');
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -291,6 +303,7 @@ export const AdminMembersPage: React.FC = () => {
             Cari member berdasarkan Member ID, WhatsApp, atau nama untuk transaksi offline kasir
           </p>
         </div>
+        <MemberQrScanner onMemberCode={handleMemberQrCode} />
       </div>
 
       {/* Search Bar */}

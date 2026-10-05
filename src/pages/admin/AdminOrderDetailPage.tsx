@@ -466,7 +466,7 @@ export const AdminOrderDetailPage: React.FC = () => {
                   </p>
                   {(it.extraSausCount > 0 || it.extraNasiCount > 0) && (
                     <p className="text-amber-400/90 text-[11px]">
-                      {it.extraSausCount > 0 && `+${it.extraSausCount} Extra Saus `}
+                      {it.extraSausCount > 0 && `+${it.extraSausCount} Extra Saus${it.extraSausName ? ` (${it.extraSausName})` : ''} `}
                       {it.extraNasiCount > 0 && `+${it.extraNasiCount} Extra Nasi`}
                     </p>
                   )}

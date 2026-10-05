@@ -7,15 +7,13 @@ import {
   ArrowRight,
   Sparkles,
   MapPin,
-  MessageCircle,
-  Phone,
   Flame,
   Check,
 } from 'lucide-react';
 import { PromoBanner } from '../components/home/PromoBanner';
 import { useAuth } from '../context/AuthContext';
 import { Product } from '../types';
-import { INITIAL_PRODUCTS, formatRupiah } from '../lib/utils';
+import { INITIAL_PRODUCTS, formatRupiah, applyOfficialPricing } from '../lib/utils';
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { MemberCard } from '../components/member/MemberCard';
@@ -36,8 +34,9 @@ export const HomePage: React.FC = () => {
         const snap = await getDocs(q);
         if (!snap.empty) {
           const list = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as Product[];
+          const pricedList = list.map(applyOfficialPricing);
           // Filter out Teriyaki & Paket Wings just in case legacy docs exist
-          const filtered = list.filter(
+          const filtered = pricedList.filter(
             (p) =>
               !p.name.toLowerCase().includes('teriyaki') &&
               !p.name.toLowerCase().includes('wings')
@@ -106,7 +105,7 @@ export const HomePage: React.FC = () => {
                   <span className="text-[10px] text-amber-400 uppercase font-bold tracking-wider">Menu Favorit</span>
                   <p className="font-extrabold text-sm">Ayam Saus Sadis</p>
                 </div>
-                <span className="font-bold text-amber-400">Mulai Rp10.000</span>
+                <span className="font-bold text-amber-400">Mulai Rp12.000</span>
               </div>
             </div>
           </div>
@@ -215,7 +214,7 @@ export const HomePage: React.FC = () => {
                   <div>
                     <span className="text-[10px] text-stone-500 font-semibold block">Mulai dari</span>
                     <span className="text-sm font-black text-amber-600">
-                      {formatRupiah(item.prices.ayamSaja || item.prices.tanpaNasi)}
+                      {formatRupiah(item.prices.tanpaNasi)}
                     </span>
                   </div>
                   <Link
@@ -293,15 +292,6 @@ export const HomePage: React.FC = () => {
             >
               <MapPin className="w-4 h-4 text-amber-400" />
               <span>Buka Google Maps</span>
-            </a>
-            <a
-              href="https://wa.me/6282379474173"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition-colors flex items-center gap-2 shadow-sm"
-            >
-              <Phone className="w-4 h-4" />
-              <span>WhatsApp (082379474173)</span>
             </a>
           </div>
         </div>

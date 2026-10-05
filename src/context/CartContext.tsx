@@ -53,6 +53,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           i.productId === itemData.productId &&
           i.variant === itemData.variant &&
           i.extraSausCount === itemData.extraSausCount &&
+          (i.extraSausName || '') === (itemData.extraSausName || '') &&
           i.extraNasiCount === itemData.extraNasiCount &&
           i.chickenPartNote === itemData.chickenPartNote
       );

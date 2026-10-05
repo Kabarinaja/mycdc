@@ -46,6 +46,7 @@ export interface CartItem {
   basePrice: number;
   extraSausCount: number;
   extraSausPrice: number;
+  extraSausName?: string;
   extraNasiCount: number;
   extraNasiPrice: number;
   chickenPartNote: string; // e.g. "Minta paha", "Minta dada", "Minta sayap", "Bebas"

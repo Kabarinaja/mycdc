@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Product, ProductVariantKey } from '../types';
-import { INITIAL_PRODUCTS, formatRupiah } from '../lib/utils';
+import { INITIAL_PRODUCTS, formatRupiah, applyOfficialPricing } from '../lib/utils';
 import { useCart } from '../context/CartContext';
 import { useNotification } from '../context/NotificationContext';
 import { Plus, Check, ShoppingBag, X, Info, Flame } from 'lucide-react';
@@ -15,6 +15,7 @@ export const MenuPage: React.FC = () => {
   // Modal customizer state
   const [variant, setVariant] = useState<ProductVariantKey>('dengan_nasi');
   const [extraSausCount, setExtraSausCount] = useState(0);
+  const [extraSausName, setExtraSausName] = useState('');
   const [extraNasiCount, setExtraNasiCount] = useState(0);
   const [chickenPartNote, setChickenPartNote] = useState('Bebas');
   const [quantity, setQuantity] = useState(1);
@@ -36,8 +37,9 @@ export const MenuPage: React.FC = () => {
             id: doc.id,
             ...doc.data(),
           })) as Product[];
+          const pricedList = list.map(applyOfficialPricing);
           // Strictly exclude Teriyaki and Wings
-          const validList = list.filter(
+          const validList = pricedList.filter(
             (p) =>
               !p.name.toLowerCase().includes('teriyaki') &&
               !p.name.toLowerCase().includes('wings')
@@ -59,27 +61,23 @@ export const MenuPage: React.FC = () => {
   const openCustomizer = (product: Product) => {
     setSelectedProduct(product);
     // If product is Mentai, default to 'dengan_nasi' because Mentai doesn't offer ayam saja
-    if (!product.prices.ayamSaja) {
-      setVariant('dengan_nasi');
-    } else {
-      setVariant('dengan_nasi');
-    }
+    setVariant('dengan_nasi');
     setExtraSausCount(0);
+    setExtraSausName('');
     setExtraNasiCount(0);
     setChickenPartNote('Bebas');
     setQuantity(1);
   };
 
   const getVariantPrice = (prod: Product, v: ProductVariantKey): number => {
-    if (v === 'ayam_saja') return prod.prices.ayamSaja || 10000;
     if (v === 'tanpa_nasi') return prod.prices.tanpaNasi || 12000;
     return prod.prices.denganNasi || 16000;
   };
 
-  const getVariantLabel = (v: ProductVariantKey): string => {
-    if (v === 'ayam_saja') return 'Ayam Saja';
-    if (v === 'tanpa_nasi') return 'Tanpa Nasi';
-    return 'Dengan Nasi';
+  const getVariantLabel = (prod: Product, v: ProductVariantKey): string => {
+    if (prod.id === 'ori') return v === 'tanpa_nasi' ? 'Ori (Tanpa Nasi)' : 'Ori + Nasi';
+    if (prod.id === 'mentai') return v === 'tanpa_nasi' ? 'Mentai (Tanpa Nasi)' : 'Mentai + Nasi';
+    return v === 'tanpa_nasi' ? 'Ayam + Saus (Tanpa Nasi)' : 'Ayam + Saus + Nasi';
   };
 
   const handleAddToCart = () => {
@@ -91,10 +89,11 @@ export const MenuPage: React.FC = () => {
       productName: selectedProduct.name,
       productImage: selectedProduct.imageUrl,
       variant,
-      variantLabel: getVariantLabel(variant),
+      variantLabel: getVariantLabel(selectedProduct, variant),
       basePrice,
-      extraSausCount,
-      extraSausPrice: selectedProduct.extraOptions.extraSaus || 2000,
+      extraSausCount: extraSausName.trim() ? Math.max(1, extraSausCount) : 0,
+      extraSausPrice: 2000,
+      extraSausName: extraSausName.trim() || undefined,
       extraNasiCount,
       extraNasiPrice: selectedProduct.extraOptions.extraNasi || 4000,
       chickenPartNote,
@@ -102,7 +101,7 @@ export const MenuPage: React.FC = () => {
     });
 
     showToast(
-      `${quantity}x ${selectedProduct.name} (${getVariantLabel(variant)}) ditambahkan ke pesanan.`,
+      `${quantity}x ${selectedProduct.name} (${getVariantLabel(selectedProduct, variant)}) ditambahkan ke pesanan.`,
       'success',
       'Ditambahkan ke Keranjang'
     );
@@ -136,7 +135,7 @@ export const MenuPage: React.FC = () => {
       {/* Products Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((item) => {
-          const startingPrice = item.prices.ayamSaja || item.prices.tanpaNasi;
+          const startingPrice = item.prices.tanpaNasi;
 
           return (
             <div
@@ -169,16 +168,11 @@ export const MenuPage: React.FC = () => {
 
                   {/* Price Tag Preview */}
                   <div className="pt-2 flex flex-wrap gap-1.5 text-[11px] font-semibold text-stone-600">
-                    {item.prices.ayamSaja && (
-                      <span className="px-2 py-0.5 rounded-lg bg-stone-100">
-                        Ayam saja: <strong>{formatRupiah(item.prices.ayamSaja)}</strong>
-                      </span>
-                    )}
                     <span className="px-2 py-0.5 rounded-lg bg-stone-100">
-                      Tanpa nasi: <strong>{formatRupiah(item.prices.tanpaNasi)}</strong>
+                      {item.id === 'ori' ? 'Ori tanpa nasi' : `${item.name} tanpa nasi`}: <strong>{formatRupiah(item.prices.tanpaNasi)}</strong>
                     </span>
                     <span className="px-2 py-0.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200">
-                      + Nasi: <strong>{formatRupiah(item.prices.denganNasi)}</strong>
+                      {item.id === 'ori' ? 'Ori + nasi' : `${item.name} + nasi`}: <strong>{formatRupiah(item.prices.denganNasi)}</strong>
                     </span>
                   </div>
                 </div>
@@ -230,24 +224,7 @@ export const MenuPage: React.FC = () => {
               <label className="text-xs font-bold uppercase tracking-wider text-stone-700">
                 Pilih Paket Ayam
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                {selectedProduct.prices.ayamSaja && (
-                  <button
-                    type="button"
-                    onClick={() => setVariant('ayam_saja')}
-                    className={`p-3 rounded-2xl border text-left transition-all ${
-                      variant === 'ayam_saja'
-                        ? 'border-amber-500 bg-amber-50/70 ring-2 ring-amber-500/20'
-                        : 'border-stone-200 hover:bg-stone-50'
-                    }`}
-                  >
-                    <span className="block text-xs font-bold text-stone-900">Ayam Saja</span>
-                    <span className="block text-xs text-amber-700 font-extrabold mt-1">
-                      {formatRupiah(selectedProduct.prices.ayamSaja)}
-                    </span>
-                  </button>
-                )}
-
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setVariant('tanpa_nasi')}
@@ -257,7 +234,7 @@ export const MenuPage: React.FC = () => {
                       : 'border-stone-200 hover:bg-stone-50'
                   }`}
                 >
-                  <span className="block text-xs font-bold text-stone-900">Tanpa Nasi</span>
+                  <span className="block text-xs font-bold text-stone-900">{selectedProduct.id === 'ori' ? 'Ori (Tanpa Nasi)' : selectedProduct.id === 'mentai' ? 'Mentai (Tanpa Nasi)' : 'Ayam + Saus'}</span>
                   <span className="block text-xs text-amber-700 font-extrabold mt-1">
                     {formatRupiah(selectedProduct.prices.tanpaNasi)}
                   </span>
@@ -272,12 +249,19 @@ export const MenuPage: React.FC = () => {
                       : 'border-stone-200 hover:bg-stone-50'
                   }`}
                 >
-                  <span className="block text-xs font-bold text-stone-900">+ Nasi Hangat</span>
+                  <span className="block text-xs font-bold text-stone-900">{selectedProduct.id === 'ori' ? 'Ori + Nasi' : selectedProduct.id === 'mentai' ? 'Mentai + Nasi' : 'Ayam + Saus + Nasi'}</span>
                   <span className="block text-xs text-amber-700 font-extrabold mt-1">
                     {formatRupiah(selectedProduct.prices.denganNasi)}
                   </span>
                 </button>
               </div>
+              <p className="text-[11px] text-stone-500">
+                {selectedProduct.id === 'mentai'
+                  ? 'Mentai: Rp14.000 tanpa nasi • Rp18.000 dengan nasi.'
+                  : selectedProduct.id === 'ori'
+                    ? 'Ori: Rp10.000 tanpa nasi • Rp13.000 dengan nasi.'
+                    : 'Saus lainnya: Rp12.000 tanpa nasi • Rp16.000 dengan nasi.'}
+              </p>
             </div>
 
             {/* Chicken Part Preference */}
@@ -316,27 +300,39 @@ export const MenuPage: React.FC = () => {
               </label>
 
               {/* Extra Saus */}
-              <div className="flex items-center justify-between p-3 rounded-2xl border border-stone-200 bg-stone-50/50">
+              <div className="p-3 rounded-2xl border border-stone-200 bg-stone-50/50 space-y-2">
                 <div>
-                  <span className="text-xs font-bold text-stone-900 block">Extra Saus {selectedProduct.name}</span>
-                  <span className="text-[11px] text-stone-500">+Rp2.000 / porsi</span>
+                  <span className="text-xs font-bold text-stone-900 block">Extra Saus</span>
+                  <span className="text-[11px] text-stone-500">Ketik sendiri saus yang diinginkan • Rp2.000 / porsi</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setExtraSausCount((c) => Math.max(0, c - 1))}
-                    className="w-7 h-7 rounded-lg bg-stone-200 hover:bg-stone-300 font-bold text-stone-800 text-sm"
-                  >
-                    -
-                  </button>
-                  <span className="text-xs font-bold w-4 text-center">{extraSausCount}</span>
-                  <button
-                    type="button"
-                    onClick={() => setExtraSausCount((c) => c + 1)}
-                    className="w-7 h-7 rounded-lg bg-stone-200 hover:bg-stone-300 font-bold text-stone-800 text-sm"
-                  >
-                    +
-                  </button>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={extraSausName}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setExtraSausName(value);
+                      if (!value.trim()) setExtraSausCount(0);
+                      else if (extraSausCount === 0) setExtraSausCount(1);
+                    }}
+                    placeholder="Contoh: Keju, Sadis, BBQ..."
+                    className="flex-1 min-w-0 px-3 py-2.5 rounded-xl border border-stone-200 bg-white text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  />
+                  <div className="flex items-center gap-1 bg-white border border-stone-200 rounded-xl p-1">
+                    <button
+                      type="button"
+                      onClick={() => setExtraSausCount((c) => Math.max(0, c - 1))}
+                      className="w-7 h-7 rounded-lg bg-stone-100 hover:bg-stone-200 font-bold text-stone-800 text-sm"
+                    >-</button>
+                    <span className="text-xs font-bold w-4 text-center">{extraSausCount}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (extraSausName.trim()) setExtraSausCount((c) => c + 1);
+                      }}
+                      className="w-7 h-7 rounded-lg bg-stone-100 hover:bg-stone-200 font-bold text-stone-800 text-sm"
+                    >+</button>
+                  </div>
                 </div>
               </div>
 
@@ -395,7 +391,7 @@ export const MenuPage: React.FC = () => {
                 <span>
                   {formatRupiah(
                     (getVariantPrice(selectedProduct, variant) +
-                      extraSausCount * 2000 +
+                      (extraSausName.trim() ? extraSausCount : 0) * 2000 +
                       extraNasiCount * 4000) *
                       quantity
                   )}

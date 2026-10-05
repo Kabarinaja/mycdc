@@ -113,7 +113,7 @@ export const AdminProductsPage: React.FC = () => {
         <div>
           <h1 className="text-2xl font-black text-white tracking-tight">Katalog Menu & Harga Produk</h1>
           <p className="text-xs text-stone-400">
-            Kelola harga Ayam Saja, Tanpa Nasi, Dengan Nasi, Extra Saus & Nasi (Data tersimpan di Firestore)
+            Kelola harga paket Ayam + Saus, Ayam + Saus + Nasi, Extra Saus & Extra Nasi (Data tersimpan di Firestore)
           </p>
         </div>
 
@@ -169,23 +169,18 @@ export const AdminProductsPage: React.FC = () => {
             {/* Pricing Details */}
             <div className="space-y-1.5 bg-stone-900/90 rounded-2xl p-3 border border-stone-850 text-xs">
               <div className="flex justify-between text-stone-300">
-                <span>Ayam Saja:</span>
-                <strong className="text-white">
-                  {prod.prices.ayamSaja ? formatRupiah(prod.prices.ayamSaja) : 'Tidak Tersedia'}
-                </strong>
-              </div>
-              <div className="flex justify-between text-stone-300">
-                <span>Tanpa Nasi:</span>
+                <span>{prod.id === 'ori' ? 'Ori tanpa nasi:' : 'Ayam + Saus:'}</span>
                 <strong className="text-white">{formatRupiah(prod.prices.tanpaNasi)}</strong>
               </div>
               <div className="flex justify-between text-stone-300">
-                <span>+ Nasi Putih:</span>
+                <span>{prod.id === 'ori' ? 'Ori + nasi:' : 'Ayam + Saus + Nasi:'}</span>
                 <strong className="text-amber-400">{formatRupiah(prod.prices.denganNasi)}</strong>
               </div>
-              <div className="pt-1 border-t border-stone-800 flex justify-between text-[11px] text-stone-400">
+              <div className="flex justify-between text-stone-300">
                 <span>Extra Saus: {formatRupiah(prod.extraOptions.extraSaus)}</span>
                 <span>Extra Nasi: {formatRupiah(prod.extraOptions.extraNasi)}</span>
               </div>
+
             </div>
 
             {/* Actions */}
@@ -243,25 +238,9 @@ export const AdminProductsPage: React.FC = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <div className="space-y-1">
-                  <label className="font-bold text-stone-300">Ayam Saja (Rp)</label>
-                  <input
-                    type="number"
-                    value={editingProduct.prices.ayamSaja || 0}
-                    onChange={(e) =>
-                      setEditingProduct({
-                        ...editingProduct,
-                        prices: { ...editingProduct.prices, ayamSaja: Number(e.target.value) || 0 },
-                      })
-                    }
-                    className="w-full p-2.5 rounded-xl border border-stone-700 bg-stone-850 text-white font-bold"
-                  />
-                  <span className="text-[10px] text-stone-500">0 jika tidak ada</span>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="font-bold text-stone-300">Tanpa Nasi (Rp) *</label>
+                  <label className="font-bold text-stone-300">Ayam + Saus / Tanpa Nasi (Rp) *</label>
                   <input
                     type="number"
                     required
@@ -277,7 +256,7 @@ export const AdminProductsPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="font-bold text-stone-300">+ Nasi (Rp) *</label>
+                  <label className="font-bold text-stone-300">Ayam + Saus + Nasi (Rp) *</label>
                   <input
                     type="number"
                     required

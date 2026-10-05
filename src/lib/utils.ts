@@ -85,7 +85,6 @@ export const INITIAL_PRODUCTS: Product[] = [
     sortOrder: 1,
     badge: 'Best Seller Pedas',
     prices: {
-      ayamSaja: 10000,
       tanpaNasi: 12000,
       denganNasi: 16000,
     },
@@ -121,7 +120,6 @@ export const INITIAL_PRODUCTS: Product[] = [
     isActive: true,
     sortOrder: 3,
     prices: {
-      ayamSaja: 10000,
       tanpaNasi: 12000,
       denganNasi: 16000,
     },
@@ -140,7 +138,6 @@ export const INITIAL_PRODUCTS: Product[] = [
     sortOrder: 4,
     badge: 'Kids Favorite',
     prices: {
-      ayamSaja: 10000,
       tanpaNasi: 12000,
       denganNasi: 16000,
     },
@@ -158,7 +155,6 @@ export const INITIAL_PRODUCTS: Product[] = [
     isActive: true,
     sortOrder: 5,
     prices: {
-      ayamSaja: 10000,
       tanpaNasi: 12000,
       denganNasi: 16000,
     },
@@ -176,7 +172,6 @@ export const INITIAL_PRODUCTS: Product[] = [
     isActive: true,
     sortOrder: 6,
     prices: {
-      ayamSaja: 10000,
       tanpaNasi: 12000,
       denganNasi: 16000,
     },
@@ -194,9 +189,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     isActive: true,
     sortOrder: 7,
     prices: {
-      ayamSaja: 10000,
-      tanpaNasi: 12000,
-      denganNasi: 16000,
+      tanpaNasi: 10000,
+      denganNasi: 13000,
     },
     extraOptions: {
       extraSaus: 2000,
@@ -204,3 +198,16 @@ export const INITIAL_PRODUCTS: Product[] = [
     },
   },
 ];
+
+
+// Official current pricing requested by MY CDC GATSU.
+// This keeps the customer-facing catalog correct even if older Firestore price data is still present.
+export function applyOfficialPricing(product: Product): Product {
+  const official = INITIAL_PRODUCTS.find((item) => item.id === product.id);
+  if (!official) return product;
+  return {
+    ...product,
+    prices: official.prices,
+    extraOptions: official.extraOptions,
+  };
+}

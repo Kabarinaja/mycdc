@@ -277,7 +277,7 @@ export const CheckoutPage: React.FC = () => {
                       </p>
                       {(item.extraSausCount > 0 || item.extraNasiCount > 0) && (
                         <p className="text-[10px] text-amber-700 font-semibold">
-                          {item.extraSausCount > 0 && `+${item.extraSausCount} Extra Saus `}
+                          {item.extraSausCount > 0 && `+${item.extraSausCount} Extra Saus${item.extraSausName ? ` (${item.extraSausName})` : ''} `}
                           {item.extraNasiCount > 0 && `+${item.extraNasiCount} Extra Nasi`}
                         </p>
                       )}
