@@ -93,7 +93,7 @@ export const MenuPage: React.FC = () => {
       basePrice,
       extraSausCount: extraSausName.trim() ? Math.max(1, extraSausCount) : 0,
       extraSausPrice: 2000,
-      extraSausName: extraSausName.trim() || undefined,
+      extraSausName: extraSausName.trim(),
       extraNasiCount,
       extraNasiPrice: selectedProduct.extraOptions.extraNasi || 4000,
       chickenPartNote,
