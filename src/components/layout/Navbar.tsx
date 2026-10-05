@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingBag, User, Award, MessageCircle, Menu as MenuIcon, X, UtensilsCrossed, Receipt } from 'lucide-react';
+import {
+  ShoppingBag,
+  User,
+  Award,
+  MessageCircle,
+  Menu as MenuIcon,
+  X,
+  UtensilsCrossed,
+  Receipt,
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 
@@ -28,24 +37,20 @@ export const Navbar: React.FC = () => {
     <>
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200 transition-all">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-          {/* Logo and Brand */}
-          <Link to="/" className="flex items-center gap-3 group focus:outline-none">
+
+          {/* Logo Only */}
+          <Link
+            to="/"
+            className="flex items-center focus:outline-none group"
+          >
             <img
               src="https://cdn.phototourl.com/member/2026-10-04-0358363c-e2cc-469e-8e79-0f841bfb3c3c.png"
               alt="Logo MY CDC GATSU"
               className="h-10 w-auto object-contain transition-transform group-hover:scale-105"
             />
-            <div className="flex flex-col">
-              <span className="font-extrabold text-base tracking-tight text-stone-900 leading-tight">
-                MY CDC GATSU
-              </span>
-              <span className="text-[10px] uppercase font-bold tracking-wider text-amber-600">
-                Dicelup Ayam Crispy
-              </span>
-            </div>
           </Link>
 
-          {/* Desktop Navigation Links */}
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <Link
@@ -62,9 +67,10 @@ export const Navbar: React.FC = () => {
             ))}
           </nav>
 
-          {/* Right Action Icons (Cart, Points, Profile) */}
+          {/* Right Action Icons */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Member Points Quick Badge (if logged in) */}
+
+            {/* Member Points */}
             {profile && (
               <Link
                 to="/poin"
@@ -76,13 +82,14 @@ export const Navbar: React.FC = () => {
               </Link>
             )}
 
-            {/* Cart Button */}
+            {/* Cart */}
             <Link
               to="/checkout"
               className="relative p-2 rounded-xl text-stone-700 hover:bg-stone-100 transition-colors focus:outline-none"
               aria-label="Keranjang Belanja"
             >
               <ShoppingBag className="w-5 h-5 text-stone-800" />
+
               {totalItemsCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-rose-600 text-white text-[11px] font-bold h-5 min-w-[20px] px-1 rounded-full flex items-center justify-center shadow-md animate-pulse">
                   {totalItemsCount}
@@ -99,7 +106,10 @@ export const Navbar: React.FC = () => {
                 <div className="w-7 h-7 rounded-full bg-amber-500 text-stone-950 flex items-center justify-center font-bold text-xs">
                   {profile.name.charAt(0).toUpperCase()}
                 </div>
-                <span className="hidden sm:inline max-w-[90px] truncate">{profile.name}</span>
+
+                <span className="hidden sm:inline max-w-[90px] truncate">
+                  {profile.name}
+                </span>
               </Link>
             ) : (
               <Link
@@ -111,35 +121,54 @@ export const Navbar: React.FC = () => {
               </Link>
             )}
 
-            {/* Mobile Menu Hamburger */}
+            {/* Mobile Menu */}
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 md:hidden rounded-xl text-stone-700 hover:bg-stone-100 focus:outline-none"
               aria-label="Buka Menu"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <MenuIcon className="w-5 h-5" />}
+              {mobileMenuOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <MenuIcon className="w-5 h-5" />
+              )}
             </button>
           </div>
         </div>
 
-        {/* Mobile Dropdown Menu */}
+        {/* Mobile Dropdown */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-stone-200 bg-white px-4 pt-3 pb-5 space-y-1.5 shadow-lg">
+
             {profile && (
               <div className="flex items-center justify-between p-3 rounded-xl bg-amber-50 border border-amber-200 mb-3">
                 <div className="flex items-center gap-2.5">
+
                   <div className="w-8 h-8 rounded-full bg-amber-500 text-stone-950 flex items-center justify-center font-bold text-sm">
                     {profile.name.charAt(0).toUpperCase()}
                   </div>
+
                   <div>
-                    <p className="text-xs font-bold text-stone-900">{profile.name}</p>
-                    <p className="text-[11px] text-stone-600 font-mono">{profile.memberId}</p>
+                    <p className="text-xs font-bold text-stone-900">
+                      {profile.name}
+                    </p>
+
+                    <p className="text-[11px] text-stone-600 font-mono">
+                      {profile.memberId}
+                    </p>
                   </div>
+
                 </div>
+
                 <div className="text-right">
-                  <p className="text-[10px] uppercase font-bold text-amber-700">Saldo Poin</p>
-                  <p className="text-sm font-extrabold text-amber-900">{profile.points} Pts</p>
+                  <p className="text-[10px] uppercase font-bold text-amber-700">
+                    Saldo Poin
+                  </p>
+
+                  <p className="text-sm font-extrabold text-amber-900">
+                    {profile.points} Pts
+                  </p>
                 </div>
               </div>
             )}
@@ -180,8 +209,9 @@ export const Navbar: React.FC = () => {
         )}
       </header>
 
-      {/* Mobile Bottom Navigation Bar for rapid thumb access */}
+      {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-stone-200 px-2 py-1.5 flex items-center justify-around shadow-lg">
+
         <Link
           to="/"
           className={`flex flex-col items-center py-1 px-3 rounded-lg transition-colors ${
@@ -191,6 +221,7 @@ export const Navbar: React.FC = () => {
           <UtensilsCrossed className="w-5 h-5" />
           <span className="text-[10px] mt-0.5">Beranda</span>
         </Link>
+
         <Link
           to="/menu"
           className={`flex flex-col items-center py-1 px-3 rounded-lg transition-colors ${
@@ -200,6 +231,7 @@ export const Navbar: React.FC = () => {
           <MenuIcon className="w-5 h-5" />
           <span className="text-[10px] mt-0.5">Menu</span>
         </Link>
+
         <Link
           to="/pesanan"
           className={`flex flex-col items-center py-1 px-3 rounded-lg transition-colors ${
@@ -209,6 +241,7 @@ export const Navbar: React.FC = () => {
           <Receipt className="w-5 h-5" />
           <span className="text-[10px] mt-0.5">Pesanan</span>
         </Link>
+
         <Link
           to="/member"
           className={`flex flex-col items-center py-1 px-3 rounded-lg transition-colors ${
@@ -218,6 +251,7 @@ export const Navbar: React.FC = () => {
           <Award className="w-5 h-5" />
           <span className="text-[10px] mt-0.5">Member</span>
         </Link>
+
         <Link
           to="/chat"
           className={`flex flex-col items-center py-1 px-3 rounded-lg transition-colors ${
@@ -227,6 +261,7 @@ export const Navbar: React.FC = () => {
           <MessageCircle className="w-5 h-5" />
           <span className="text-[10px] mt-0.5">Chat</span>
         </Link>
+
       </nav>
     </>
   );
