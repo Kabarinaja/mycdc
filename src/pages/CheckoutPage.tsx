@@ -137,24 +137,39 @@ export const CheckoutPage: React.FC = () => {
       const orderId = doc(collection(db, 'orders')).id;
       const orderNumber = generateOrderNumber();
 
+      // Firestore rejects `undefined` anywhere in an object, including nested
+      // cart items. Normalize optional values before writing the order.
+      const firestoreItems = items.map((item) => ({
+        ...item,
+        extraSausName: item.extraSausName ?? '',
+        chickenPartNote: item.chickenPartNote ?? 'Bebas',
+        productImage: item.productImage ?? '',
+        extraSausCount: item.extraSausCount ?? 0,
+        extraSausPrice: item.extraSausPrice ?? 0,
+        extraNasiCount: item.extraNasiCount ?? 0,
+        extraNasiPrice: item.extraNasiPrice ?? 0,
+        quantity: item.quantity ?? 1,
+        itemSubtotal: item.itemSubtotal ?? 0,
+      }));
+
       const newOrder: Order = {
         id: orderId,
         orderNumber,
         userId: currentUser.uid,
-        memberId: profile.memberId,
+        memberId: profile.memberId ?? '',
         customerName: recipientName.trim(),
         customerWhatsapp: whatsapp.trim(),
         deliveryAddress: deliveryAddress.trim(),
         addressNote: (addressNote + (orderNote ? ` | Catatan: ${orderNote}` : '')).trim(),
         shippingArea,
-        shippingFee,
-        items,
-        subtotal: cartSubtotal,
-        pointsRedeemed: discountFromPoints > 0 ? pointsToUse : 0,
-        discountFromPoints,
-        total: finalTotal,
+        shippingFee: shippingFee ?? 0,
+        items: firestoreItems,
+        subtotal: cartSubtotal ?? 0,
+        pointsRedeemed: discountFromPoints > 0 ? (pointsToUse ?? 0) : 0,
+        discountFromPoints: discountFromPoints ?? 0,
+        total: finalTotal ?? 0,
         paymentMethod: 'qris',
-        paymentProofUrl: proofUrl,
+        paymentProofUrl: proofUrl ?? '',
         paymentStatus: 'pending_verification',
         orderStatus: 'payment_verification',
         orderType: 'delivery',
