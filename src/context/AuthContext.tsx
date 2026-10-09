@@ -10,7 +10,7 @@ import {
   sendPasswordResetEmail,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
-import { auth, db, PRIMARY_ADMIN_UID } from '../lib/firebase';
+import { auth, db, PRIMARY_ADMIN_UID, ADMIN_EMAILS } from '../lib/firebase';
 import { UserProfile } from '../types';
 import { generateMemberId } from '../lib/utils';
 
@@ -36,9 +36,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
 
   // Derived admin verification
-  const isAdmin = Boolean(
-    currentUser && (currentUser.uid === PRIMARY_ADMIN_UID || profile?.role === 'admin')
-  );
+  const isUserAdmin = (user: FirebaseUser | null, prof?: UserProfile | null) => {
+    if (!user) return false;
+    if (user.uid === PRIMARY_ADMIN_UID) return true;
+    if (user.email && ADMIN_EMAILS.map(e => e.toLowerCase()).includes(user.email.toLowerCase())) return true;
+    if (prof?.role === 'admin') return true;
+    return false;
+  };
+
+  const isAdmin = Boolean(isUserAdmin(currentUser, profile));
 
   useEffect(() => {
     let unsubscribeDoc: (() => void) | null = null;
@@ -48,6 +54,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (user) {
         const userRef = doc(db, 'users', user.uid);
+        const isMaster = user.uid === PRIMARY_ADMIN_UID || (user.email && ADMIN_EMAILS.map(e => e.toLowerCase()).includes(user.email.toLowerCase()));
 
         // Listen for real-time changes to profile (e.g. points update by admin, etc.)
         unsubscribeDoc = onSnapshot(
@@ -55,8 +62,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           async (snapshot) => {
             if (snapshot.exists()) {
               const data = snapshot.data();
-              // Auto-grant admin role in memory if UID matches primary admin
-              const effectiveRole = user.uid === PRIMARY_ADMIN_UID ? 'admin' : (data.role || 'customer');
+              // Auto-grant admin role in memory if UID or email matches admin
+              const effectiveRole = isMaster ? 'admin' : (data.role || 'customer');
               setProfile({
                 id: user.uid,
                 name: data.name || user.displayName || 'Member CDC',
@@ -70,14 +77,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               });
             } else {
               // Document doesn't exist yet (e.g. primary admin logging in first time or special flow)
-              const isPrimary = user.uid === PRIMARY_ADMIN_UID;
               const newProfile: UserProfile = {
                 id: user.uid,
-                name: user.displayName || (isPrimary ? 'Admin CDC Gatsu' : 'Pelanggan CDC'),
+                name: user.displayName || (isMaster ? 'Admin CDC Gatsu' : 'Pelanggan CDC'),
                 email: user.email || '',
-                whatsapp: isPrimary ? '082379474173' : '',
+                whatsapp: isMaster ? '082379474173' : '',
                 memberId: generateMemberId(),
-                role: isPrimary ? 'admin' : 'customer',
+                role: isMaster ? 'admin' : 'customer',
                 points: 0,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -137,16 +143,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const snap = await getDoc(userRef);
 
       let isNewOrIncomplete = false;
+      const isMaster = user.uid === PRIMARY_ADMIN_UID || (user.email && ADMIN_EMAILS.map(e => e.toLowerCase()).includes(user.email.toLowerCase()));
+
       if (!snap.exists()) {
-        isNewOrIncomplete = true;
-        const isPrimary = user.uid === PRIMARY_ADMIN_UID;
+        isNewOrIncomplete = !isMaster;
         const newProfile: UserProfile = {
           id: user.uid,
-          name: user.displayName || 'Member CDC',
+          name: user.displayName || (isMaster ? 'Admin CDC Gatsu' : 'Member CDC'),
           email: user.email || '',
-          whatsapp: isPrimary ? '082379474173' : '',
+          whatsapp: isMaster ? '082379474173' : '',
           memberId: generateMemberId(),
-          role: isPrimary ? 'admin' : 'customer',
+          role: isMaster ? 'admin' : 'customer',
           points: 0,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -159,7 +166,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setProfile(newProfile);
       } else {
         const data = snap.data();
-        if (!data.whatsapp || !data.whatsapp.trim()) {
+        if (!isMaster && (!data.whatsapp || !data.whatsapp.trim())) {
           isNewOrIncomplete = true;
         }
       }
@@ -189,7 +196,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const cred = await createUserWithEmailAndPassword(auth, email.trim(), pass);
       const uid = cred.user.uid;
-      const isPrimary = uid === PRIMARY_ADMIN_UID;
+      const isMaster = uid === PRIMARY_ADMIN_UID || (email && ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email.trim().toLowerCase()));
       const memberId = generateMemberId();
 
       const newUserData: UserProfile = {
@@ -198,7 +205,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         email: email.trim().toLowerCase(),
         whatsapp: whatsapp.trim(),
         memberId,
-        role: isPrimary ? 'admin' : 'customer',
+        role: isMaster ? 'admin' : 'customer',
         points: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -229,13 +236,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const snap = await getDoc(doc(db, 'users', currentUser.uid));
       if (snap.exists()) {
         const data = snap.data();
+        const isMaster = currentUser.uid === PRIMARY_ADMIN_UID || (currentUser.email && ADMIN_EMAILS.map(e => e.toLowerCase()).includes(currentUser.email.toLowerCase()));
         setProfile({
           id: currentUser.uid,
           name: data.name,
           email: data.email,
           whatsapp: data.whatsapp,
           memberId: data.memberId,
-          role: currentUser.uid === PRIMARY_ADMIN_UID ? 'admin' : data.role,
+          role: isMaster ? 'admin' : (data.role || 'customer'),
           points: Number(data.points) || 0,
           createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt,
           updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : data.updatedAt,

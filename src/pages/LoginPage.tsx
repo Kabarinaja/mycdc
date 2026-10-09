@@ -57,6 +57,8 @@ export const LoginPage: React.FC = () => {
       console.error('Google sign in error:', err);
       if (err.code === 'auth/popup-closed-by-user') {
         showToast('Jendela login Google ditutup sebelum selesai.', 'info');
+      } else if (err.code === 'auth/unauthorized-domain') {
+        showToast('Domain aplikasi ini belum didaftarkan di Firebase Console (Authentication > Settings > Authorized Domains). Silakan login dengan Email/Password atau tambahkan domain di console.', 'error', 'Domain Belum Diizinkan');
       } else {
         showToast('Gagal masuk dengan Google: ' + (err.message || 'Coba lagi'), 'error');
       }

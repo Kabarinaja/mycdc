@@ -12,6 +12,7 @@ export const firebaseConfig = {
 };
 
 export const PRIMARY_ADMIN_UID = import.meta.env.VITE_ADMIN_UID || "oSR3DIuFx7hmW3OvVmgN6uPYzzr1";
+export const ADMIN_EMAILS = ["kabarinaja.info@gmail.com"];
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 

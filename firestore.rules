@@ -10,6 +10,7 @@ service cloud.firestore {
     function isAdmin() {
       return isSignedIn() && (
         request.auth.uid == "oSR3DIuFx7hmW3OvVmgN6uPYzzr1" ||
+        request.auth.token.email == "kabarinaja.info@gmail.com" ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin")
       );
@@ -30,11 +31,10 @@ service cloud.firestore {
       allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin();
 
-      // Customer can create profile on registration with role 'customer' and 0 points
+      // Customer can create profile on registration with role 'customer' or admin if designated
       allow create: if isSignedIn() && (
         (isOwner(userId) &&
-         request.resource.data.role == "customer" &&
-         request.resource.data.points == 0 &&
+         (request.resource.data.role == "customer" || request.auth.token.email == "kabarinaja.info@gmail.com" || request.auth.uid == "oSR3DIuFx7hmW3OvVmgN6uPYzzr1") &&
          request.resource.data.id == userId) ||
         isAdmin()
       );
