@@ -1,17 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import {
-  ShoppingBag,
-  User,
-  Award,
-  MessageCircle,
-  Menu as MenuIcon,
-  X,
-  UtensilsCrossed,
-  Receipt,
-} from 'lucide-react';
+import { ShoppingBag, User, Award, MessageCircle, Menu as MenuIcon, X, Home, Utensils, ReceiptText } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+
+const logoUrl = 'https://cdn.phototourl.com/member/2026-10-04-0358363c-e2cc-469e-8e79-0f841bfb3c3c.png';
 
 export const Navbar: React.FC = () => {
   const { profile } = useAuth();
@@ -19,249 +12,82 @@ export const Navbar: React.FC = () => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const isActive = (path: string) => {
-    if (path === '/' && location.pathname === '/') return true;
-    if (path !== '/' && location.pathname.startsWith(path)) return true;
-    return false;
-  };
-
+  const isActive = (path: string) => path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
   const navLinks = [
-    { label: 'Beranda', to: '/' },
-    { label: 'Menu', to: '/menu' },
-    { label: 'Pesanan', to: '/pesanan' },
-    { label: 'Member & Poin', to: '/member' },
-    { label: 'Chat Outlet', to: '/chat' },
+    { label: 'Beranda', to: '/', icon: Home },
+    { label: 'Menu', to: '/menu', icon: Utensils },
+    { label: 'Pesanan', to: '/pesanan', icon: ReceiptText },
+    { label: 'Member & Poin', to: '/member', icon: Award },
+    { label: 'Chat Admin', to: '/chat', icon: MessageCircle },
   ];
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200 transition-all">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-
-          {/* Logo Only */}
-          <Link
-            to="/"
-            className="flex items-center focus:outline-none group"
-          >
-            <img
-              src="https://cdn.phototourl.com/member/2026-10-04-0358363c-e2cc-469e-8e79-0f841bfb3c3c.png"
-              alt="Logo MY CDC GATSU"
-              className="h-10 w-auto object-contain transition-transform group-hover:scale-105"
-            />
+      <header className="sticky top-0 z-50 border-b border-zinc-200/80 bg-white/95 backdrop-blur-xl">
+        <div className="mx-auto flex h-[68px] max-w-6xl items-center gap-3 px-4 sm:px-6">
+          <Link to="/" className="flex min-w-0 items-center gap-2.5" aria-label="Beranda MY CDC GATSU">
+            <img src={logoUrl} alt="MY CDC GATSU" className="h-9 w-auto max-w-[52px] object-contain" />
+            <div className="min-w-0 leading-none">
+              <p className="truncate text-[12px] font-black tracking-tight text-zinc-950">DICELUP AYAM CRISPY</p>
+              <p className="mt-1 text-[8px] font-bold uppercase tracking-[0.16em] text-amber-600">Indramayu · MY CDC GATSU</p>
+            </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="ml-auto hidden items-center gap-1 md:flex">
             {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all ${
-                  isActive(link.to)
-                    ? 'bg-amber-500 text-stone-950 shadow-sm'
-                    : 'text-stone-600 hover:text-stone-950 hover:bg-stone-100'
-                }`}
-              >
+              <Link key={link.to} to={link.to} className={`rounded-xl px-3 py-2 text-[11px] font-bold transition ${isActive(link.to) ? 'bg-amber-100 text-amber-900' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950'}`}>
                 {link.label}
               </Link>
             ))}
           </nav>
 
-          {/* Right Action Icons */}
-          <div className="flex items-center gap-2 sm:gap-3">
-
-            {/* Member Points */}
-            {profile && (
-              <Link
-                to="/poin"
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 text-amber-800 rounded-full text-xs font-bold hover:bg-amber-100 transition-colors"
-                title="Saldo Poin Member"
-              >
-                <Award className="w-3.5 h-3.5 text-amber-600" />
-                <span>{profile.points} Poin</span>
-              </Link>
-            )}
-
-            {/* Cart */}
-            <Link
-              to="/checkout"
-              className="relative p-2 rounded-xl text-stone-700 hover:bg-stone-100 transition-colors focus:outline-none"
-              aria-label="Keranjang Belanja"
-            >
-              <ShoppingBag className="w-5 h-5 text-stone-800" />
-
-              {totalItemsCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-rose-600 text-white text-[11px] font-bold h-5 min-w-[20px] px-1 rounded-full flex items-center justify-center shadow-md animate-pulse">
-                  {totalItemsCount}
-                </span>
-              )}
+          <div className="ml-auto flex items-center gap-1 md:ml-2">
+            {profile && <Link to="/poin" className="hidden rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-[10px] font-extrabold text-amber-800 sm:flex sm:items-center sm:gap-1.5"><Award className="h-3.5 w-3.5" />{profile.points} poin</Link>}
+            <Link to="/checkout" className="relative grid h-10 w-10 place-items-center rounded-xl text-zinc-700 hover:bg-zinc-100" aria-label="Keranjang">
+              <ShoppingBag className="h-[19px] w-[19px]" />
+              {totalItemsCount > 0 && <span className="absolute right-0.5 top-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-red-600 px-1 text-[9px] font-black text-white">{totalItemsCount}</span>}
             </Link>
-
-            {/* Profile / Login */}
             {profile ? (
-              <Link
-                to="/profil"
-                className="flex items-center gap-2 p-1 sm:px-2.5 sm:py-1 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold transition-colors"
-              >
-                <div className="w-7 h-7 rounded-full bg-amber-500 text-stone-950 flex items-center justify-center font-bold text-xs">
-                  {profile.name.charAt(0).toUpperCase()}
-                </div>
-
-                <span className="hidden sm:inline max-w-[90px] truncate">
-                  {profile.name}
-                </span>
-              </Link>
+              <Link to="/profil" className="grid h-10 w-10 place-items-center rounded-xl bg-zinc-100 text-xs font-black text-zinc-900 hover:bg-zinc-200" aria-label="Profil">{profile.name.charAt(0).toUpperCase()}</Link>
             ) : (
-              <Link
-                to="/login"
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-900 text-white text-xs font-bold hover:bg-stone-800 transition-colors"
-              >
-                <User className="w-3.5 h-3.5" />
-                <span>Masuk</span>
-              </Link>
+              <Link to="/login" className="hidden rounded-xl bg-zinc-950 px-3.5 py-2.5 text-[11px] font-extrabold text-white sm:block">Masuk</Link>
             )}
-
-            {/* Mobile Menu */}
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 md:hidden rounded-xl text-stone-700 hover:bg-stone-100 focus:outline-none"
-              aria-label="Buka Menu"
-            >
-              {mobileMenuOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <MenuIcon className="w-5 h-5" />
-              )}
+            <button onClick={() => setMobileMenuOpen((v) => !v)} className="grid h-10 w-10 place-items-center rounded-xl text-zinc-700 hover:bg-zinc-100 md:hidden" aria-label="Menu lainnya">
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <MenuIcon className="h-5 w-5" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Dropdown */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-stone-200 bg-white px-4 pt-3 pb-5 space-y-1.5 shadow-lg">
-
-            {profile && (
-              <div className="flex items-center justify-between p-3 rounded-xl bg-amber-50 border border-amber-200 mb-3">
-                <div className="flex items-center gap-2.5">
-
-                  <div className="w-8 h-8 rounded-full bg-amber-500 text-stone-950 flex items-center justify-center font-bold text-sm">
-                    {profile.name.charAt(0).toUpperCase()}
-                  </div>
-
-                  <div>
-                    <p className="text-xs font-bold text-stone-900">
-                      {profile.name}
-                    </p>
-
-                    <p className="text-[11px] text-stone-600 font-mono">
-                      {profile.memberId}
-                    </p>
-                  </div>
-
-                </div>
-
-                <div className="text-right">
-                  <p className="text-[10px] uppercase font-bold text-amber-700">
-                    Saldo Poin
-                  </p>
-
-                  <p className="text-sm font-extrabold text-amber-900">
-                    {profile.points} Pts
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-                  isActive(link.to)
-                    ? 'bg-amber-500 text-stone-950 font-bold'
-                    : 'text-stone-700 hover:bg-stone-100'
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-
-            {profile ? (
-              <Link
-                to="/profil"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block px-3.5 py-2.5 rounded-xl text-sm font-semibold text-stone-700 hover:bg-stone-100"
-              >
-                Pengaturan Profil Saya
-              </Link>
-            ) : (
-              <Link
-                to="/register"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block text-center mt-2 px-3.5 py-2.5 rounded-xl bg-amber-500 text-stone-950 text-sm font-bold shadow-sm"
-              >
-                Daftar Member Baru
-              </Link>
-            )}
+          <div className="border-t border-zinc-100 bg-white px-4 pb-4 pt-2 shadow-lg md:hidden">
+            {profile && <div className="mb-2 flex items-center justify-between rounded-2xl bg-amber-50 p-3"><div><p className="text-xs font-extrabold text-zinc-950">{profile.name}</p><p className="mt-0.5 text-[10px] text-zinc-500">{profile.memberId}</p></div><span className="text-xs font-black text-amber-800">{profile.points} poin</span></div>}
+            <div className="grid grid-cols-2 gap-2">
+              {navLinks.slice(3).map((link) => { const Icon = link.icon; return <Link key={link.to} to={link.to} onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 rounded-xl bg-zinc-50 px-3 py-2.5 text-xs font-bold text-zinc-700"><Icon className="h-4 w-4 text-amber-600" />{link.label}</Link>; })}
+              {!profile && <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="rounded-xl bg-zinc-950 px-3 py-2.5 text-center text-xs font-extrabold text-white">Masuk / Daftar</Link>}
+              {profile && <Link to="/profil" onClick={() => setMobileMenuOpen(false)} className="rounded-xl bg-zinc-950 px-3 py-2.5 text-center text-xs font-extrabold text-white">Profil Saya</Link>}
+            </div>
           </div>
         )}
       </header>
 
-      {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-stone-200 px-2 py-1.5 flex items-center justify-around shadow-lg">
-
-        <Link
-          to="/"
-          className={`flex flex-col items-center py-1 px-3 rounded-lg transition-colors ${
-            isActive('/') ? 'text-amber-600 font-bold' : 'text-stone-500'
-          }`}
-        >
-          <UtensilsCrossed className="w-5 h-5" />
-          <span className="text-[10px] mt-0.5">Beranda</span>
-        </Link>
-
-        <Link
-          to="/menu"
-          className={`flex flex-col items-center py-1 px-3 rounded-lg transition-colors ${
-            isActive('/menu') ? 'text-amber-600 font-bold' : 'text-stone-500'
-          }`}
-        >
-          <MenuIcon className="w-5 h-5" />
-          <span className="text-[10px] mt-0.5">Menu</span>
-        </Link>
-
-        <Link
-          to="/pesanan"
-          className={`flex flex-col items-center py-1 px-3 rounded-lg transition-colors ${
-            isActive('/pesanan') ? 'text-amber-600 font-bold' : 'text-stone-500'
-          }`}
-        >
-          <Receipt className="w-5 h-5" />
-          <span className="text-[10px] mt-0.5">Pesanan</span>
-        </Link>
-
-        <Link
-          to="/member"
-          className={`flex flex-col items-center py-1 px-3 rounded-lg transition-colors ${
-            isActive('/member') ? 'text-amber-600 font-bold' : 'text-stone-500'
-          }`}
-        >
-          <Award className="w-5 h-5" />
-          <span className="text-[10px] mt-0.5">Member</span>
-        </Link>
-
-        <Link
-          to="/chat"
-          className={`flex flex-col items-center py-1 px-3 rounded-lg transition-colors ${
-            isActive('/chat') ? 'text-amber-600 font-bold' : 'text-stone-500'
-          }`}
-        >
-          <MessageCircle className="w-5 h-5" />
-          <span className="text-[10px] mt-0.5">Chat</span>
-        </Link>
-
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-zinc-200/90 bg-white/96 px-2 pb-[max(7px,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-8px_30px_rgba(24,24,27,0.08)] backdrop-blur-xl md:hidden">
+        <div className="mx-auto grid max-w-lg grid-cols-5">
+          {[
+            { label: 'Beranda', to: '/', icon: Home },
+            { label: 'Menu', to: '/menu', icon: Utensils },
+            { label: 'Troli', to: '/checkout', icon: ShoppingBag },
+            { label: 'Pesanan', to: '/pesanan', icon: ReceiptText },
+            { label: 'Profil', to: profile ? '/profil' : '/login', icon: User },
+          ].map((item) => { const Icon = item.icon; const active = isActive(item.to); return (
+            <Link key={item.label} to={item.to} className={`relative flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-2xl text-[9px] font-bold ${active ? 'text-amber-700' : 'text-zinc-400'}`}>
+              <span className={`relative grid h-7 w-9 place-items-center rounded-xl ${active ? 'bg-amber-100' : ''}`}>
+                <Icon className="h-[17px] w-[17px]" />
+                {item.label === 'Troli' && totalItemsCount > 0 && <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-red-600 px-1 text-[8px] font-black text-white">{totalItemsCount}</span>}
+              </span>
+              {item.label}
+            </Link>
+          ); })}
+        </div>
       </nav>
     </>
   );
