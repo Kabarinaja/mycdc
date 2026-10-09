@@ -306,6 +306,47 @@ export const AdminMembersPage: React.FC = () => {
         <MemberQrScanner onMemberCode={handleMemberQrCode} />
       </div>
 
+      {/* Real-time Member Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
+          <div className="flex items-center justify-between text-xs text-stone-400">
+            <span>Total Akun Terdaftar</span>
+            <Users className="w-4 h-4 text-amber-400" />
+          </div>
+          <p className="text-2xl font-black text-white font-mono">{members.length}</p>
+          <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 pt-1">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Real-time onSnapshot Firestore</span>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
+          <div className="flex items-center justify-between text-xs text-stone-400">
+            <span>Member Aktif</span>
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          </div>
+          <p className="text-2xl font-black text-emerald-400 font-mono">
+            {members.filter((m) => (m.points || 0) > 0).length}
+          </p>
+          <p className="text-[10px] text-stone-500 pt-1">
+            Member dengan saldo loyalty aktif
+          </p>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
+          <div className="flex items-center justify-between text-xs text-stone-400">
+            <span>Total Poin Beredar</span>
+            <Award className="w-4 h-4 text-amber-400" />
+          </div>
+          <p className="text-2xl font-black text-amber-400 font-mono">
+            {members.reduce((sum, m) => sum + (Number(m.points) || 0), 0)} Poin
+          </p>
+          <p className="text-[10px] text-stone-500 pt-1">
+            Setara {formatRupiah(members.reduce((sum, m) => sum + (Number(m.points) || 0), 0) * 100)}
+          </p>
+        </div>
+      </div>
+
       {/* Search Bar */}
       <div className="bg-stone-950 border border-stone-800 rounded-2xl p-3 flex items-center gap-3">
         <Search className="w-5 h-5 text-stone-500 shrink-0 ml-1" />

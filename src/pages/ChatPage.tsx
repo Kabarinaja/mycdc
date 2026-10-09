@@ -10,12 +10,14 @@ import {
   setDoc,
   query,
   orderBy,
+  where,
   onSnapshot,
   serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { formatDateIndo } from '../lib/utils';
 import { uploadToCloudinary } from '../lib/cloudinary';
+import { VoiceCallModal } from '../components/chat/VoiceCallModal';
 import {
   Send,
   MapPin,
@@ -26,6 +28,7 @@ import {
   CheckCheck,
   Store,
   ExternalLink,
+  Phone,
 } from 'lucide-react';
 
 export const ChatPage: React.FC = () => {
@@ -39,9 +42,39 @@ export const ChatPage: React.FC = () => {
   const [sending, setSending] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
 
+  // WebRTC Voice Call States
+  const [showVoiceCall, setShowVoiceCall] = useState(false);
+  const [incomingCallId, setIncomingCallId] = useState<string | null>(null);
+  const [isIncoming, setIsIncoming] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const chatId = currentUser?.uid;
+
+  // Listen for incoming call sessions for this customer
+  useEffect(() => {
+    if (!chatId || !currentUser) return;
+
+    const callsRef = collection(db, 'calls');
+    const qCalls = query(
+      callsRef,
+      where('chatId', '==', chatId),
+      where('status', 'in', ['calling', 'ringing'])
+    );
+
+    const unsubscribeCalls = onSnapshot(qCalls, (snap) => {
+      snap.docs.forEach((d) => {
+        const data = d.data();
+        if (data.callerId !== currentUser.uid && (data.status === 'calling' || data.status === 'ringing')) {
+          setIncomingCallId(d.id);
+          setIsIncoming(true);
+          setShowVoiceCall(true);
+        }
+      });
+    });
+
+    return () => unsubscribeCalls();
+  }, [chatId, currentUser]);
 
   useEffect(() => {
     if (!chatId) return;
@@ -208,13 +241,49 @@ export const ChatPage: React.FC = () => {
           </div>
         </div>
 
-        {orderIdParam && (
-          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-full text-xs text-amber-800 font-bold">
-            <Receipt className="w-3.5 h-3.5" />
-            <span>Terkait Pesanan: {orderIdParam.substring(0, 10)}...</span>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {orderIdParam && (
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-full text-xs text-amber-800 font-bold">
+              <Receipt className="w-3.5 h-3.5" />
+              <span>Pesanan: {orderIdParam.substring(0, 10)}...</span>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => {
+              setIsIncoming(false);
+              setIncomingCallId(null);
+              setShowVoiceCall(true);
+            }}
+            className="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs"
+            title="Mulai Panggilan Suara dengan Kru Outlet"
+          >
+            <Phone className="w-4 h-4" />
+            <span className="hidden sm:inline">Panggilan Suara</span>
+          </button>
+        </div>
       </div>
+
+      {/* WebRTC Voice Call Modal */}
+      {showVoiceCall && currentUser && profile && (
+        <VoiceCallModal
+          chatId={chatId || currentUser.uid}
+          orderId={orderIdParam || undefined}
+          currentUserId={currentUser.uid}
+          currentUserName={profile.name}
+          currentUserRole="customer"
+          targetUserId="admin"
+          targetUserName="Kru Outlet CDC Gatsu"
+          activeCallId={incomingCallId}
+          isIncomingCall={isIncoming}
+          onClose={() => {
+            setShowVoiceCall(false);
+            setIncomingCallId(null);
+            setIsIncoming(false);
+          }}
+        />
+      )}
 
       {/* Messages Scroll Area */}
       <div className="flex-1 bg-stone-100 border-x border-stone-200 p-4 overflow-y-auto space-y-3">

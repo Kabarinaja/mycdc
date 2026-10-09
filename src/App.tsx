@@ -23,6 +23,7 @@ import { ChatPage } from './pages/ChatPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { AdminEntryPage } from './pages/AdminEntryPage';
+import { PosPage } from './pages/PosPage';
 
 // Admin Pages
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
@@ -73,6 +74,9 @@ export default function App() {
 
                 {/* Secret Crew Gate Entry */}
                 <Route path="/admingatsu" element={<AdminEntryPage />} />
+
+                {/* Standalone POS Cashier Route */}
+                <Route path="/poskasircdc" element={<PosPage />} />
 
                 {/* Protected Admin Routes */}
                 <Route path="/admin" element={<AdminLayout />}>
