@@ -1,141 +1,58 @@
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Award, ShieldCheck, Sparkles, Phone, CreditCard } from 'lucide-react';
+import { Award, ShieldCheck, Sparkles, CreditCard } from 'lucide-react';
 import { UserProfile } from '../../types';
 import { formatRupiah, pointsToRupiah } from '../../lib/utils';
 
-interface MemberCardProps {
-  profile: UserProfile;
-  compact?: boolean;
-}
+interface MemberCardProps { profile: UserProfile; }
 
-export const MemberCard: React.FC<MemberCardProps> = ({ profile, compact = false }) => {
-  if (compact) {
-    return (
-      <div className="flex items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-white p-3 shadow-sm">
-        <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
-            Member MY CDC GATSU
-          </p>
-          <h3 className="mt-1 truncate text-sm font-extrabold text-stone-900">
-            {profile.name}
-          </h3>
-          <p className="mt-1 text-xs text-stone-600">
-            {profile.points} poin
-          </p>
-          <p className="text-sm font-extrabold text-amber-700">
-            {formatRupiah(pointsToRupiah(profile.points))}
-          </p>
-          <p className="mt-1 text-[10px] text-stone-500">
-            Ketuk untuk melihat kartu member lengkap
-          </p>
-        </div>
-        <div className="shrink-0 rounded-xl border border-stone-200 bg-white p-1.5">
-          <QRCodeSVG
-            value={profile.memberId}
-            size={64}
-            level="H"
-            includeMargin={false}
-          />
-        </div>
-      </div>
-    );
-  }
+export const MemberCard: React.FC<MemberCardProps> = ({ profile }) => (
+  <div className="relative overflow-hidden rounded-[28px] border border-zinc-800 bg-zinc-950 text-white shadow-[0_18px_45px_rgba(24,24,27,0.18)]">
+    <div className="absolute -right-20 -top-24 h-56 w-56 rounded-full bg-amber-400/15 blur-3xl" />
+    <div className="absolute -bottom-24 -left-16 h-48 w-48 rounded-full bg-red-500/10 blur-3xl" />
 
-  return (
-    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-stone-900 via-stone-850 to-stone-950 p-6 sm:p-8 text-white shadow-2xl border border-stone-800">
-      {/* Decorative subtle texture glow */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-600/10 rounded-full blur-3xl pointer-events-none -ml-20 -mb-20"></div>
-
-      {/* Top Header Card */}
-      <div className="relative z-10 flex items-center justify-between pb-6 border-b border-stone-800/80">
+    <div className="relative p-5 sm:p-7">
+      <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <img
-            src="https://cdn.phototourl.com/member/2026-10-04-0358363c-e2cc-469e-8e79-0f841bfb3c3c.png"
-            alt="Logo"
-            className="h-10 w-auto object-contain brightness-110"
-          />
+          <div className="grid h-11 w-11 place-items-center overflow-hidden rounded-2xl bg-white p-1.5 shadow-sm">
+            <img src="https://cdn.phototourl.com/member/2026-10-04-0358363c-e2cc-469e-8e79-0f841bfb3c3c.png" alt="MY CDC GATSU" className="max-h-full max-w-full object-contain" />
+          </div>
           <div>
-            <h3 className="font-extrabold text-sm sm:text-base tracking-tight text-white leading-tight">
-              MY CDC GATSU
-            </h3>
-            <p className="text-[11px] font-bold text-amber-400 tracking-wider uppercase">
-              Loyalty VIP Member
-            </p>
+            <p className="text-sm font-black tracking-tight">MY CDC GATSU</p>
+            <p className="mt-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-amber-400">Official Member</p>
+          </div>
+        </div>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2.5 py-1 text-[9px] font-extrabold text-emerald-300"><Sparkles className="h-3 w-3" /> Aktif</span>
+      </div>
+
+      <div className="relative mt-7 grid grid-cols-[1fr_auto] items-center gap-4 sm:gap-8">
+        <div className="min-w-0">
+          <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-zinc-500">Pemilik kartu</p>
+          <h3 className="mt-1 truncate text-xl font-black tracking-tight sm:text-2xl">{profile.name}</h3>
+          <div className="mt-3 flex items-center gap-2 text-[10px] text-zinc-400">
+            <CreditCard className="h-3.5 w-3.5 text-amber-400" />
+            <span className="font-mono font-bold tracking-widest text-zinc-300">{profile.memberId}</span>
+          </div>
+
+          <div className="mt-5 inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] px-3.5 py-3">
+            <div className="grid h-9 w-9 place-items-center rounded-xl bg-amber-400 text-zinc-950"><Award className="h-5 w-5" /></div>
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-wider text-zinc-500">Poin tersedia</p>
+              <div className="flex items-baseline gap-1.5"><strong className="text-xl font-black text-amber-300">{profile.points}</strong><span className="text-[9px] text-zinc-500">≈ {formatRupiah(pointsToRupiah(profile.points))}</span></div>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-500/20 border border-amber-500/30 rounded-full text-amber-300 text-xs font-bold">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span>Member Aktif</span>
+        <div className="rounded-2xl bg-white p-2.5 shadow-xl">
+          <QRCodeSVG value={profile.memberId} size={102} level="H" includeMargin={false} />
+          <p className="mt-2 text-center text-[8px] font-black uppercase tracking-wider text-zinc-500">Scan di kasir</p>
         </div>
       </div>
 
-      {/* Middle Body with Member Info and QR Code */}
-      <div className="relative z-10 py-6 grid grid-cols-1 sm:grid-cols-3 gap-6 items-center">
-        {/* Member Details */}
-        <div className="sm:col-span-2 space-y-3">
-          <div>
-            <span className="text-[11px] uppercase font-bold text-stone-400 tracking-wider">Nama Anggota</span>
-            <h4 className="text-xl sm:text-2xl font-black text-white tracking-tight">{profile.name}</h4>
-          </div>
-
-          <div className="flex flex-wrap gap-4 text-xs text-stone-300">
-            <div className="flex items-center gap-1.5">
-              <CreditCard className="w-4 h-4 text-amber-400" />
-              <span className="font-mono font-bold tracking-wider text-amber-300">{profile.memberId}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Phone className="w-4 h-4 text-stone-400" />
-              <span>{profile.whatsapp || '-'}</span>
-            </div>
-          </div>
-
-          {/* Points Highlight */}
-          <div className="pt-2">
-            <div className="inline-flex items-center gap-3 bg-stone-900/90 border border-stone-800 rounded-2xl p-3 sm:p-4">
-              <div className="w-10 h-10 rounded-xl bg-amber-500 text-stone-950 flex items-center justify-center font-extrabold shadow-md">
-                <Award className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-[10px] uppercase font-bold text-stone-400 tracking-wider">Saldo Poin</p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-black text-amber-400 leading-none">
-                    {profile.points}
-                  </span>
-                  <span className="text-xs text-stone-400 font-semibold">
-                    (= {formatRupiah(pointsToRupiah(profile.points))} hemat)
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* QR Code Container for Offline Cashier Scan */}
-        <div className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl shadow-xl text-stone-950 border-4 border-amber-500/80">
-          <QRCodeSVG
-            value={profile.memberId}
-            size={120}
-            level="H"
-            includeMargin={false}
-          />
-          <div className="mt-2 text-center">
-            <span className="text-[10px] font-bold text-stone-500 uppercase tracking-widest block">Scan Kasir Outlet</span>
-            <span className="font-mono text-xs font-extrabold tracking-wider text-stone-900 block">{profile.memberId}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Footer Note */}
-      <div className="relative z-10 pt-4 border-t border-stone-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-stone-400 gap-2">
-        <div className="flex items-center gap-1.5 text-stone-400 text-[11px]">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Tunjukkan QR saat transaksi offline di outlet atau gunakan poin saat delivery online.</span>
-        </div>
-        <span className="text-[10px] text-amber-500 font-semibold">1 Poin = Rp100 (Min. redeem 10 Poin)</span>
+      <div className="mt-5 flex items-center gap-2 border-t border-white/10 pt-4 text-[9px] leading-relaxed text-zinc-500">
+        <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+        <span>Gunakan QR member saat transaksi di outlet atau gunakan poin sesuai ketentuan program.</span>
       </div>
     </div>
-  );
-};
+  </div>
+);
