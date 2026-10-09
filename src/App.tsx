@@ -8,6 +8,7 @@ import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { AdminLayout } from './components/layout/AdminLayout';
+import { FloatingChat } from './components/layout/FloatingChat';
 
 // Public & Customer Pages
 import { HomePage } from './pages/HomePage';
@@ -36,12 +37,13 @@ import { AdminReportsPage } from './pages/admin/AdminReportsPage';
 
 const PublicLayout: React.FC = () => {
   return (
-    <div className="flex flex-col min-h-screen bg-stone-50 text-stone-900 font-sans">
+    <div className="flex flex-col min-h-screen bg-zinc-50 text-zinc-900 font-sans">
       <Navbar />
       <main className="flex-1">
         <Outlet />
       </main>
       <Footer />
+      <FloatingChat />
     </div>
   );
 };

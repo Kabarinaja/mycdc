@@ -1,9 +1,9 @@
 import React from 'react';
-import { MapPin, Phone, MessageSquare } from 'lucide-react';
+import { MapPin, MessageSquare } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   const MAPS_URL = "https://maps.app.goo.gl/pPDPnQA9NaJwpdbn9?g_st=ac&utm_source=chatgpt.com";
-  const WA_NUMBER = "082379474173";
+  const WA_URL = "https://wa.me/6282379474173";
 
   return (
     <footer className="bg-stone-900 text-stone-300 pt-12 pb-24 md:pb-12 border-t border-stone-800">
@@ -18,12 +18,12 @@ export const Footer: React.FC = () => {
                 className="h-10 w-auto object-contain brightness-110"
               />
               <div>
-                <h3 className="text-white font-extrabold text-lg tracking-tight">MY CDC GATSU</h3>
+                <h3 className="text-white font-extrabold text-lg tracking-tight">DICELUP AYAM CRISPY</h3>
                 <p className="text-xs text-amber-500 font-semibold tracking-wider uppercase">Dicelup Ayam Crispy</p>
               </div>
             </div>
             <p className="text-xs text-stone-400 leading-relaxed max-w-sm">
-              Sistem member resmi, pemesanan online delivery, dan program loyalitas poin MY CDC GATSU.
+              Pemesanan online, program member, dan layanan delivery resmi DICELUP AYAM CRISPY.
             </p>
           </div>
 
@@ -32,15 +32,15 @@ export const Footer: React.FC = () => {
             <h4 className="text-xs font-bold uppercase tracking-wider text-amber-500">Kontak Outlet</h4>
             <div className="space-y-2 text-xs">
               <a
-                href={`https://wa.me/62${WA_NUMBER.substring(1)}`}
+                href={WA_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2.5 text-stone-300 hover:text-white transition-colors"
+                aria-label="WhatsApp Admin"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#25D366]/10 text-[#16a34a] transition hover:bg-[#25D366]/20"
               >
-                <div className="p-1.5 rounded-lg bg-stone-800 text-emerald-400">
-                  <Phone className="w-3.5 h-3.5" />
-                </div>
-                <span>WhatsApp: <strong className="text-white">{WA_NUMBER}</strong></span>
+                <svg viewBox="0 0 32 32" aria-hidden="true" className="h-6 w-6" fill="currentColor">
+                  <path d="M16 3.2a12.7 12.7 0 0 0-10.9 19l-1.3 4.8 4.9-1.3A12.8 12.8 0 1 0 16 3.2Zm0 23.2a10.4 10.4 0 0 1-5.3-1.4l-.4-.2-2.9.8.8-2.8-.3-.5A10.4 10.4 0 1 1 16 26.4Zm5.7-7.8c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-1.9-1-3.1-1.7-4.3-3.8-.3-.5.3-.5.8-1.6.1-.2 0-.4 0-.5 0-.2-.7-1.7-1-2.2-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1.1 1.1-1.1 2.6s1.1 3 1.3 3.2c.2.2 2.2 3.4 5.4 4.8 2 .9 2.8 1 3.8.8.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.3-.3-.4-.5-.5Z"/>
+                </svg>
               </a>
               <div className="flex items-center gap-2.5 text-stone-400">
                 <div className="p-1.5 rounded-lg bg-stone-800 text-amber-400">

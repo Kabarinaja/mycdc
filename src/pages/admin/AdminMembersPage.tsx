@@ -291,28 +291,6 @@ export const AdminMembersPage: React.FC = () => {
     }
     setSearchTerm(found.memberId);
     showToast(`${found.name} (${found.memberId}) ditemukan. Silakan pilih aksi kasir.`, 'success', 'Member Ditemukan');
-
-    // Konfirmasi suara saat QR member berhasil dikenali.
-    if ('speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined') {
-      window.speechSynthesis.cancel();
-
-      const points = Number(found.points) || 0;
-      const rupiah = new Intl.NumberFormat('id-ID').format(points * 100);
-      const utterance = new SpeechSynthesisUtterance(
-        `Member terdeteksi atas nama ${found.name}. Total poin Anda adalah ${points} poin, setara ${rupiah} rupiah.`
-      );
-
-      utterance.lang = 'id-ID';
-      utterance.rate = 0.92;
-      utterance.pitch = 1;
-
-      const indonesianVoice = window.speechSynthesis
-        .getVoices()
-        .find((voice) => voice.lang.toLowerCase().startsWith('id'));
-
-      if (indonesianVoice) utterance.voice = indonesianVoice;
-      window.speechSynthesis.speak(utterance);
-    }
   };
 
   return (
