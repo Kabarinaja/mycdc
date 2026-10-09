@@ -6,9 +6,42 @@ import { formatRupiah, pointsToRupiah } from '../../lib/utils';
 
 interface MemberCardProps {
   profile: UserProfile;
+  compact?: boolean;
 }
 
-export const MemberCard: React.FC<MemberCardProps> = ({ profile }) => {
+export const MemberCard: React.FC<MemberCardProps> = ({ profile, compact = false }) => {
+  if (compact) {
+    return (
+      <div className="flex items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-white p-3 shadow-sm">
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
+            Member MY CDC GATSU
+          </p>
+          <h3 className="mt-1 truncate text-sm font-extrabold text-stone-900">
+            {profile.name}
+          </h3>
+          <p className="mt-1 text-xs text-stone-600">
+            {profile.points} poin
+          </p>
+          <p className="text-sm font-extrabold text-amber-700">
+            {formatRupiah(pointsToRupiah(profile.points))}
+          </p>
+          <p className="mt-1 text-[10px] text-stone-500">
+            Ketuk untuk melihat kartu member lengkap
+          </p>
+        </div>
+        <div className="shrink-0 rounded-xl border border-stone-200 bg-white p-1.5">
+          <QRCodeSVG
+            value={profile.memberId}
+            size={64}
+            level="H"
+            includeMargin={false}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-stone-900 via-stone-850 to-stone-950 p-6 sm:p-8 text-white shadow-2xl border border-stone-800">
       {/* Decorative subtle texture glow */}

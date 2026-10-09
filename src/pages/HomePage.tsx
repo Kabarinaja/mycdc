@@ -65,6 +65,19 @@ export const HomePage: React.FC = () => {
   return (
     <div className="pb-16 max-w-6xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6">
 
+      {/* MEMBER RINGKAS DI BAGIAN ATAS */}
+      {profile && (
+        <section className="mb-5">
+          <Link
+            to="/member"
+            aria-label="Buka kartu member lengkap"
+            className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+          >
+            <MemberCard profile={profile} compact />
+          </Link>
+        </section>
+      )}
+
       {/* HERO */}
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-600 via-amber-500 to-amber-700 text-stone-950 p-6 sm:p-10 mb-8 shadow-xl">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
@@ -114,27 +127,6 @@ export const HomePage: React.FC = () => {
 
       {/* PROMOTION */}
       <PromoBanner />
-
-      {/* MEMBER */}
-      {profile && (
-        <section className="mb-10">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm uppercase tracking-wider font-extrabold text-stone-800 flex items-center gap-2">
-              <Award className="w-4 h-4 text-amber-600" />
-              <span>Kartu Member & Poin Saya</span>
-            </h2>
-
-            <Link
-              to="/member"
-              className="text-xs font-bold text-amber-600 hover:underline"
-            >
-              Lihat Detail Barcode &gt;
-            </Link>
-          </div>
-
-          <MemberCard profile={profile} />
-        </section>
-      )}
 
       {/* DELIVERY */}
       <section className="mb-10 bg-white rounded-2xl p-5 sm:p-6 border border-stone-200 shadow-sm">
