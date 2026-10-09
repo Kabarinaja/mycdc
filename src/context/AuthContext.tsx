@@ -5,8 +5,11 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
+  GoogleAuthProvider,
+  signInWithPopup,
+  sendPasswordResetEmail,
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { auth, db, PRIMARY_ADMIN_UID } from '../lib/firebase';
 import { UserProfile } from '../types';
 import { generateMemberId } from '../lib/utils';
@@ -17,6 +20,9 @@ interface AuthContextType {
   loading: boolean;
   isAdmin: boolean;
   login: (email: string, pass: string) => Promise<void>;
+  loginWithGoogle: () => Promise<{ user: FirebaseUser; isNewOrIncomplete: boolean }>;
+  completeProfile: (name: string, whatsapp: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   register: (name: string, email: string, pass: string, whatsapp: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -121,6 +127,63 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const loginWithGoogle = async () => {
+    setLoading(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const userRef = doc(db, 'users', user.uid);
+      const snap = await getDoc(userRef);
+
+      let isNewOrIncomplete = false;
+      if (!snap.exists()) {
+        isNewOrIncomplete = true;
+        const isPrimary = user.uid === PRIMARY_ADMIN_UID;
+        const newProfile: UserProfile = {
+          id: user.uid,
+          name: user.displayName || 'Member CDC',
+          email: user.email || '',
+          whatsapp: isPrimary ? '082379474173' : '',
+          memberId: generateMemberId(),
+          role: isPrimary ? 'admin' : 'customer',
+          points: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        await setDoc(userRef, {
+          ...newProfile,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+        setProfile(newProfile);
+      } else {
+        const data = snap.data();
+        if (!data.whatsapp || !data.whatsapp.trim()) {
+          isNewOrIncomplete = true;
+        }
+      }
+      return { user, isNewOrIncomplete };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const completeProfile = async (name: string, whatsapp: string) => {
+    if (!auth.currentUser) throw new Error('Pengguna belum masuk');
+    const userRef = doc(db, 'users', auth.currentUser.uid);
+    await updateDoc(userRef, {
+      name: name.trim(),
+      whatsapp: whatsapp.trim(),
+      updatedAt: serverTimestamp(),
+    });
+    await refreshProfile();
+  };
+
+  const resetPassword = async (email: string) => {
+    await sendPasswordResetEmail(auth, email.trim());
+  };
+
   const register = async (name: string, email: string, pass: string, whatsapp: string) => {
     setLoading(true);
     try {
@@ -191,6 +254,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         loading,
         isAdmin,
         login,
+        loginWithGoogle,
+        completeProfile,
+        resetPassword,
         register,
         logout,
         refreshProfile,

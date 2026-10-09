@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { collection, query, onSnapshot, doc, updateDoc, serverTimestamp, runTransaction } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { Order, OrderStatus, PaymentStatus } from '../../types';
-import { formatRupiah, formatDateIndo } from '../../lib/utils';
+import { formatRupiah, formatDateIndo, isOrderUnhandledAfter10Min, formatOrderWhatsAppMessage } from '../../lib/utils';
 import { OrderStatusBadge, PaymentStatusBadge } from '../../components/common/OrderBadge';
 import { useNotification } from '../../context/NotificationContext';
 import { useAuth } from '../../context/AuthContext';
@@ -18,6 +18,9 @@ import {
   Check,
   ChefHat,
   Package,
+  AlertTriangle,
+  MessageSquare,
+  ExternalLink,
 } from 'lucide-react';
 
 export const AdminOrdersPage: React.FC = () => {
@@ -31,6 +34,16 @@ export const AdminOrdersPage: React.FC = () => {
 
   // Quick proof preview modal
   const [previewProofUrl, setPreviewProofUrl] = useState<string | null>(null);
+
+  // Live timer for 10-minute SLA tracking
+  const [nowTimeMs, setNowTimeMs] = useState<number>(Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNowTimeMs(Date.now());
+    }, 5000); // Check every 5 seconds
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const q = query(collection(db, 'orders'));
@@ -111,35 +124,75 @@ export const AdminOrdersPage: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredOrders.map((ord) => (
-            <div
-              key={ord.id}
-              className="bg-stone-950 border border-stone-800 rounded-3xl p-5 space-y-4 shadow-sm hover:border-stone-700 transition-all"
-            >
-              {/* Card Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-stone-850 gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-stone-900 rounded-2xl text-amber-400 border border-stone-800">
-                    <ShoppingBag className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-black text-sm text-white font-mono">{ord.orderNumber || ord.id}</span>
-                      <span className="px-2 py-0.5 rounded-full bg-stone-850 text-stone-300 font-bold text-[10px]">
-                        {ord.shippingArea === 'indramayu_kota' ? 'Indramayu Kota (9rb)' : 'Luar Kota (15rb)'}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-stone-400 mt-0.5">
-                      {ord.customerName} ({ord.customerWhatsapp}) • {formatDateIndo(ord.createdAt)}
-                    </p>
-                  </div>
-                </div>
+          {filteredOrders.map((ord) => {
+            const sla = isOrderUnhandledAfter10Min(ord, nowTimeMs);
+            const waText = formatOrderWhatsAppMessage(ord);
+            const waUrl = `https://wa.me/6282379474173?text=${encodeURIComponent(waText)}`;
 
-                <div className="flex flex-wrap items-center gap-2">
-                  <OrderStatusBadge status={ord.orderStatus} />
-                  <PaymentStatusBadge status={ord.paymentStatus} />
+            return (
+              <div
+                key={ord.id}
+                className={`border rounded-3xl p-5 space-y-4 shadow-sm transition-all ${
+                  sla.isUnhandled
+                    ? 'bg-rose-950/20 border-rose-700/80 ring-1 ring-rose-600/50'
+                    : 'bg-stone-950 border-stone-800 hover:border-stone-700'
+                }`}
+              >
+                {/* 10-Minute Timeout Escalation Warning Banner */}
+                {sla.isUnhandled && (
+                  <div className="p-3 bg-rose-900/60 border border-rose-600 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-rose-100">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0 animate-bounce" />
+                      <div>
+                        <p className="font-black text-rose-200">
+                          ⚠️ Melebihi 10 Menit Tanpa Tindakan Admin! ({sla.elapsedMinutes} menit berlalu)
+                        </p>
+                        <p className="text-[11px] text-rose-300">
+                          Pesanan delivery belum diproses/diverifikasi. Segera koordinasikan dengan kru via WhatsApp.
+                        </p>
+                      </div>
+                    </div>
+                    <a
+                      href={waUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 py-2 px-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-black text-xs transition-colors shadow-md shrink-0"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      <span>Kirim pesanan ke WhatsApp</span>
+                    </a>
+                  </div>
+                )}
+
+                {/* Card Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-stone-850 gap-2">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-stone-900 rounded-2xl text-amber-400 border border-stone-800">
+                      <ShoppingBag className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-black text-sm text-white font-mono">{ord.orderNumber || ord.id}</span>
+                        <span className="px-2 py-0.5 rounded-full bg-stone-850 text-stone-300 font-bold text-[10px]">
+                          {ord.shippingArea === 'indramayu_kota' ? 'Indramayu Kota (9rb)' : 'Luar Kota (15rb)'}
+                        </span>
+                        {/* Elapsed Time Badge */}
+                        <span className="px-2 py-0.5 rounded-full bg-stone-900 border border-stone-750 text-stone-300 text-[10px] flex items-center gap-1 font-mono">
+                          <Clock className="w-3 h-3 text-amber-400" />
+                          <span>{sla.elapsedMinutes}m lalu</span>
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-stone-400 mt-0.5">
+                        {ord.customerName} ({ord.customerWhatsapp}) • {formatDateIndo(ord.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <OrderStatusBadge status={ord.orderStatus} />
+                    <PaymentStatusBadge status={ord.paymentStatus} />
+                  </div>
                 </div>
-              </div>
 
               {/* Items & Address Summary */}
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4 text-xs">
@@ -202,7 +255,8 @@ export const AdminOrdersPage: React.FC = () => {
                 </Link>
               </div>
             </div>
-          ))}
+          );
+        })}
         </div>
       )}
 

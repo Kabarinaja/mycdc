@@ -10,6 +10,62 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="mobile-bottom-space mx-auto max-w-6xl px-4 pb-10 pt-4 sm:px-6 sm:pt-7">
+      {/* Kartu Member di Bagian Paling Atas Beranda */}
+      {profile ? (
+        <section className="mb-5 sm:mb-6">
+          <div className="mb-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="grid h-5 w-5 place-items-center rounded-md bg-amber-500 text-stone-950">
+                <Award className="h-3.5 w-3.5" />
+              </span>
+              <h2 className="text-xs font-black uppercase tracking-wider text-stone-900">
+                Kartu Member Digital Kamu
+              </h2>
+            </div>
+            <Link
+              to="/member"
+              className="text-[11px] font-bold text-amber-600 hover:text-amber-700 hover:underline flex items-center gap-1"
+            >
+              <span>Buka Kartu Penuh</span>
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <Link to="/member" className="block transition-transform active:scale-[0.99] focus:outline-none">
+            <MemberCard profile={profile} />
+          </Link>
+        </section>
+      ) : (
+        <section className="mb-5 rounded-2xl border border-amber-200 bg-linear-to-r from-amber-50 to-amber-100/60 p-3.5 sm:p-4 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber-500 text-stone-950 shadow-xs">
+                <Award className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-xs font-black text-stone-900">Program Kartu Member Digital CDC</p>
+                <p className="text-[11px] text-stone-600">
+                  Daftar gratis untuk dapatkan Member ID, kumpulkan poin loyalitas, dan diskon potongan harga.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Link
+                to="/login?redirect=/member"
+                className="rounded-xl border border-stone-300 bg-white px-3.5 py-2 text-center text-xs font-bold text-stone-800 shadow-xs hover:bg-stone-50"
+              >
+                Masuk
+              </Link>
+              <Link
+                to="/register"
+                className="rounded-xl bg-amber-500 px-3.5 py-2 text-center text-xs font-black text-stone-950 shadow-xs hover:bg-amber-400"
+              >
+                Daftar Member Baru
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="overflow-hidden rounded-[30px] border border-zinc-200 bg-white shadow-[0_10px_35px_rgba(24,24,27,0.06)]">
         <div className="relative isolate overflow-hidden bg-zinc-950 px-5 py-7 text-white sm:px-9 sm:py-10">
           <div className="absolute -right-24 -top-28 h-72 w-72 rounded-full bg-amber-400/20 blur-3xl" />
@@ -41,16 +97,6 @@ export const HomePage: React.FC = () => {
       </div>
 
       <div className="mt-7"><PromoBanner /></div>
-
-      {profile && (
-        <section className="mt-7">
-          <div className="mb-3 flex items-end justify-between gap-3">
-            <div><p className="text-[9px] font-black uppercase tracking-[0.16em] text-amber-600">Member area</p><h2 className="mt-1 text-lg font-black tracking-tight text-zinc-950">Kartu & poin kamu</h2></div>
-            <Link to="/member" className="text-[10px] font-extrabold text-zinc-500 hover:text-zinc-950">Detail member →</Link>
-          </div>
-          <MemberCard profile={profile} />
-        </section>
-      )}
 
       <section className="mt-7 rounded-[26px] border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
         <div className="flex items-start gap-3">

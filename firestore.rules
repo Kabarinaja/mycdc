@@ -126,5 +126,18 @@ service cloud.firestore {
     match /adminLogs/{logId} {
       allow read, write: if isAdmin();
     }
+
+    // POS Transactions (Offline Cashier)
+    match /pos_transactions/{txId} {
+      allow read, write: if isAdmin();
+    }
+
+    // WebRTC Voice Call Signaling
+    match /calls/{callId} {
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isAdmin();
+    }
   }
 }

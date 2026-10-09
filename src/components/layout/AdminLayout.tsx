@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   ShoppingBag,
+  Store,
   Users,
   Utensils,
   Award,
@@ -96,6 +97,7 @@ export const AdminLayout: React.FC = () => {
 
   const navItems = [
     { label: 'Dashboard', to: '/admin', icon: LayoutDashboard, exact: true },
+    { label: 'POS Kasir', to: '/poskasircdc', icon: Store },
     { label: 'Pesanan', to: '/admin/orders', icon: ShoppingBag, badge: newOrdersCount },
     { label: 'Member', to: '/admin/members', icon: Users },
     { label: 'Produk', to: '/admin/products', icon: Utensils },
