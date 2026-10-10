@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { collection, query, onSnapshot, doc, addDoc, setDoc, orderBy, where, serverTimestamp } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, addDoc, setDoc, orderBy, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { ChatThread, ChatMessage } from '../../types';
 import { formatDateIndo } from '../../lib/utils';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
-import { VoiceCallModal } from '../../components/chat/VoiceCallModal';
 import {
   MessageCircle,
   Send,
@@ -15,7 +14,6 @@ import {
   ExternalLink,
   Store,
   CheckCheck,
-  Phone,
 } from 'lucide-react';
 
 export const AdminChatPage: React.FC = () => {
@@ -25,41 +23,12 @@ export const AdminChatPage: React.FC = () => {
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
 
-  // WebRTC Voice Call State
-  const [showVoiceCall, setShowVoiceCall] = useState(false);
-  const [incomingCallId, setIncomingCallId] = useState<string | null>(null);
-  const [isIncoming, setIsIncoming] = useState(false);
-
   const [searchParams] = useSearchParams();
   const targetUserParam = searchParams.get('userId');
 
   const { currentUser } = useAuth();
   const { showToast } = useNotification();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Listen for incoming calls for selected thread
-  useEffect(() => {
-    if (!selectedThreadId) return;
-
-    const qCalls = query(
-      collection(db, 'calls'),
-      where('chatId', '==', selectedThreadId),
-      where('status', 'in', ['calling', 'ringing'])
-    );
-
-    const unsubscribe = onSnapshot(qCalls, (snap) => {
-      snap.docs.forEach((d) => {
-        const data = d.data();
-        if (data.callerRole === 'customer') {
-          setIncomingCallId(d.id);
-          setIsIncoming(true);
-          setShowVoiceCall(true);
-        }
-      });
-    });
-
-    return () => unsubscribe();
-  }, [selectedThreadId]);
 
   // Listen to all chat threads
   useEffect(() => {
@@ -221,40 +190,7 @@ export const AdminChatPage: React.FC = () => {
                     </p>
                   </div>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsIncoming(false);
-                    setIncomingCallId(null);
-                    setShowVoiceCall(true);
-                  }}
-                  className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs flex items-center gap-1.5 transition-colors shadow-xs"
-                  title="Panggilan Suara WebRTC dengan Pelanggan"
-                >
-                  <Phone className="w-4 h-4" />
-                  <span className="hidden sm:inline">Panggilan Suara</span>
-                </button>
               </div>
-
-              {/* WebRTC Voice Call Modal */}
-              {showVoiceCall && activeThread && (
-                <VoiceCallModal
-                  chatId={activeThread.id}
-                  currentUserId={currentUser?.uid || 'admin'}
-                  currentUserName="Kru Outlet CDC Gatsu"
-                  currentUserRole="admin"
-                  targetUserId={activeThread.userId || activeThread.id}
-                  targetUserName={activeThread.customerName || 'Pelanggan'}
-                  activeCallId={incomingCallId}
-                  isIncomingCall={isIncoming}
-                  onClose={() => {
-                    setShowVoiceCall(false);
-                    setIncomingCallId(null);
-                    setIsIncoming(false);
-                  }}
-                />
-              )}
 
               {/* Messages Area */}
               <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-stone-900/30">
