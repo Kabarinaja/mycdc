@@ -291,6 +291,23 @@ export const AdminMembersPage: React.FC = () => {
     }
     setSearchTerm(found.memberId);
     showToast(`${found.name} (${found.memberId}) ditemukan. Silakan pilih aksi kasir.`, 'success', 'Member Ditemukan');
+
+    // Beri konfirmasi suara saat QR member berhasil dikenali oleh kasir.
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const points = Number(found.points) || 0;
+      const rupiah = new Intl.NumberFormat('id-ID').format(points * 100);
+      const utterance = new SpeechSynthesisUtterance(
+        `Member terdeteksi atas nama ${found.name}. Total poin Anda adalah ${points} poin, setara ${rupiah} rupiah.`
+      );
+      utterance.lang = 'id-ID';
+      utterance.rate = 0.92;
+      utterance.pitch = 1;
+      const voices = window.speechSynthesis.getVoices();
+      const indonesianVoice = voices.find((voice) => voice.lang?.toLowerCase().startsWith('id'));
+      if (indonesianVoice) utterance.voice = indonesianVoice;
+      window.speechSynthesis.speak(utterance);
+    }
   };
 
   return (
@@ -304,47 +321,6 @@ export const AdminMembersPage: React.FC = () => {
           </p>
         </div>
         <MemberQrScanner onMemberCode={handleMemberQrCode} />
-      </div>
-
-      {/* Real-time Member Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-        <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
-          <div className="flex items-center justify-between text-xs text-stone-400">
-            <span>Total Akun Terdaftar</span>
-            <Users className="w-4 h-4 text-amber-400" />
-          </div>
-          <p className="text-2xl font-black text-white font-mono">{members.length}</p>
-          <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 pt-1">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Real-time onSnapshot Firestore</span>
-          </div>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
-          <div className="flex items-center justify-between text-xs text-stone-400">
-            <span>Member Aktif</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-          </div>
-          <p className="text-2xl font-black text-emerald-400 font-mono">
-            {members.filter((m) => (m.points || 0) > 0).length}
-          </p>
-          <p className="text-[10px] text-stone-500 pt-1">
-            Member dengan saldo loyalty aktif
-          </p>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
-          <div className="flex items-center justify-between text-xs text-stone-400">
-            <span>Total Poin Beredar</span>
-            <Award className="w-4 h-4 text-amber-400" />
-          </div>
-          <p className="text-2xl font-black text-amber-400 font-mono">
-            {members.reduce((sum, m) => sum + (Number(m.points) || 0), 0)} Poin
-          </p>
-          <p className="text-[10px] text-stone-500 pt-1">
-            Setara {formatRupiah(members.reduce((sum, m) => sum + (Number(m.points) || 0), 0) * 100)}
-          </p>
-        </div>
       </div>
 
       {/* Search Bar */}

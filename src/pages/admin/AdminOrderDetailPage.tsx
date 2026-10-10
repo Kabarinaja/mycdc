@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { doc, onSnapshot, updateDoc, serverTimestamp, runTransaction, addDoc, collection } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { Order, OrderStatus, PaymentStatus, PointTransaction } from '../../types';
-import { formatRupiah, formatDateIndo, rupiahToPoints, isOrderUnhandledAfter10Min, formatOrderWhatsAppMessage } from '../../lib/utils';
+import { formatRupiah, formatDateIndo, rupiahToPoints } from '../../lib/utils';
 import { OrderStatusBadge, PaymentStatusBadge } from '../../components/common/OrderBadge';
 import { useNotification } from '../../context/NotificationContext';
 import { useAuth } from '../../context/AuthContext';
@@ -21,7 +21,6 @@ import {
   MessageCircle,
   FileText,
   AlertTriangle,
-  MessageSquare,
 } from 'lucide-react';
 
 export const AdminOrderDetailPage: React.FC = () => {
@@ -29,7 +28,6 @@ export const AdminOrderDetailPage: React.FC = () => {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
-  const [nowTimeMs, setNowTimeMs] = useState(Date.now());
 
   // Reject modal state
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
@@ -38,13 +36,6 @@ export const AdminOrderDetailPage: React.FC = () => {
   const { showToast } = useNotification();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setNowTimeMs(Date.now());
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
 
   useEffect(() => {
     if (!orderId) return;
@@ -126,8 +117,6 @@ export const AdminOrderDetailPage: React.FC = () => {
           paymentStatus: 'verified',
           orderStatus: 'accepted',
           updatedAt: serverTimestamp(),
-          adminActionAt: serverTimestamp(),
-          lastAdminActionAt: serverTimestamp(),
         });
 
         // Add admin log
@@ -164,8 +153,6 @@ export const AdminOrderDetailPage: React.FC = () => {
         paymentStatus: 'rejected',
         paymentRejectionReason: rejectionReason.trim(),
         updatedAt: serverTimestamp(),
-        adminActionAt: serverTimestamp(),
-        lastAdminActionAt: serverTimestamp(),
       });
 
       // Admin log
@@ -228,8 +215,6 @@ export const AdminOrderDetailPage: React.FC = () => {
           transaction.update(orderRef, {
             orderStatus: 'completed',
             updatedAt: serverTimestamp(),
-            adminActionAt: serverTimestamp(),
-            lastAdminActionAt: serverTimestamp(),
           });
 
           const logRef = doc(collection(db, 'adminLogs'));
@@ -248,8 +233,6 @@ export const AdminOrderDetailPage: React.FC = () => {
         await updateDoc(orderRef, {
           orderStatus: newStatus,
           updatedAt: serverTimestamp(),
-          adminActionAt: serverTimestamp(),
-          lastAdminActionAt: serverTimestamp(),
         });
         showToast(`Status pesanan diperbarui menjadi: ${newStatus}`, 'success');
       }
@@ -261,40 +244,8 @@ export const AdminOrderDetailPage: React.FC = () => {
     }
   };
 
-  const sla = order ? isOrderUnhandledAfter10Min(order, nowTimeMs) : { isUnhandled: false, elapsedMinutes: 0, remainingMinutes: 10 };
-  const waEscalationText = order ? formatOrderWhatsAppMessage(order) : '';
-  const waEscalationUrl = `https://wa.me/6282379474173?text=${encodeURIComponent(waEscalationText)}`;
-
   return (
     <div className="space-y-6 max-w-4xl mx-auto pb-16">
-      {/* 10-Minute Timeout Escalation Warning Banner */}
-      {sla.isUnhandled && (
-        <div className="p-4 bg-rose-950/80 border border-rose-600 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-rose-100 shadow-xl ring-1 ring-rose-500/50">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-rose-900 border border-rose-700 text-rose-300">
-              <AlertTriangle className="w-5 h-5 animate-bounce" />
-            </div>
-            <div>
-              <p className="font-black text-sm text-rose-200">
-                ⚠️ Melebihi 10 Menit Tanpa Tindakan Admin! ({sla.elapsedMinutes} menit berlalu)
-              </p>
-              <p className="text-[11px] text-rose-300">
-                Pesanan delivery ini belum diproses atau diverifikasi. Segera kirimkan rincian pesanan ke WhatsApp kru.
-              </p>
-            </div>
-          </div>
-          <a
-            href={waEscalationUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-black text-xs transition-colors shadow-md shrink-0"
-          >
-            <MessageSquare className="w-4 h-4" />
-            <span>Kirim Pesanan ke WhatsApp</span>
-          </a>
-        </div>
-      )}
-
       {/* Header */}
       <div className="flex items-center justify-between pb-4 border-b border-stone-800">
         <Link

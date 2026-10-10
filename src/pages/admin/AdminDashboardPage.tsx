@@ -22,9 +22,7 @@ import {
 export const AdminDashboardPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [membersCount, setMembersCount] = useState(0);
-  const [activeMembersCount, setActiveMembersCount] = useState(0);
   const [totalPointsInCirculation, setTotalPointsInCirculation] = useState(0);
-  const [statsLastUpdated, setStatsLastUpdated] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -50,46 +48,24 @@ export const AdminDashboardPage: React.FC = () => {
       }
     );
 
-    // Real-time listener on users (members)
-    const usersQuery = query(collection(db, 'users'));
-    const unsubscribeUsers = onSnapshot(
-      usersQuery,
-      (snapshot) => {
-        const total = snapshot.docs.length;
-        setMembersCount(total);
-
-        const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-        let active = 0;
+    // Fetch members count & total points
+    const fetchMembers = async () => {
+      try {
+        const usersSnap = await getDocs(collection(db, 'users'));
+        setMembersCount(usersSnap.docs.length);
         let pts = 0;
-
-        snapshot.docs.forEach((d) => {
-          const data = d.data();
-          const userPts = Number(data.points) || 0;
-          pts += userPts;
-
-          // Active member definition: has loyalty points > 0 OR profile active within last 30 days
-          const updatedAtDate = toDateSafe(data.updatedAt) || toDateSafe(data.createdAt);
-          const isRecentlyActive = updatedAtDate ? updatedAtDate.getTime() >= thirtyDaysAgo : false;
-          if (userPts > 0 || isRecentlyActive) {
-            active += 1;
-          }
+        usersSnap.docs.forEach((d) => {
+          pts += Number(d.data().points) || 0;
         });
-
-        setActiveMembersCount(active);
         setTotalPointsInCirculation(pts);
-        setStatsLastUpdated(
-          new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-        );
-      },
-      (err) => {
-        console.warn('Members real-time snapshot note:', err.message);
+      } catch (e) {
+        console.warn('Members fetch note:', e);
       }
-    );
-
-    return () => {
-      unsubscribeOrders();
-      unsubscribeUsers();
     };
+
+    fetchMembers();
+
+    return () => unsubscribeOrders();
   }, []);
 
   const pendingVerificationOrders = orders.filter((o) => o.paymentStatus === 'pending_verification');
@@ -109,16 +85,10 @@ export const AdminDashboardPage: React.FC = () => {
         </div>
         <div className="flex items-center gap-2">
           <Link
-            to="/poskasircdc"
-            className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs transition-colors shadow-md flex items-center gap-1.5"
-          >
-            <span>+ Buka POS Kasir (/poskasircdc)</span>
-          </Link>
-          <Link
             to="/admin/members"
-            className="px-3.5 py-2 rounded-xl bg-stone-850 hover:bg-stone-800 text-stone-200 font-bold text-xs transition-colors border border-stone-750 flex items-center gap-1.5"
+            className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-extrabold text-xs transition-colors shadow-md flex items-center gap-1.5"
           >
-            <span>Kelola Member</span>
+            <span>+ Transaksi Kasir Offline</span>
           </Link>
         </div>
       </div>
@@ -187,70 +157,36 @@ export const AdminDashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Member & Point Stats (Real-Time Synchronized) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Total Registered Accounts */}
-        <div className="bg-stone-950 border border-stone-800 p-4 rounded-2xl flex flex-col justify-between space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-stone-900 rounded-xl text-amber-400 border border-stone-800">
-                <Users className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xs text-stone-400">Total Akun Terdaftar</p>
-                <h4 className="text-xl font-black text-white">{membersCount} Pengguna</h4>
-              </div>
+      {/* Member & Point Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="bg-stone-950 border border-stone-800 p-4 rounded-2xl flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-stone-900 rounded-xl text-amber-400 border border-stone-800">
+              <Users className="w-5 h-5" />
             </div>
-            <Link to="/admin/members" className="text-xs text-amber-400 font-bold hover:underline">
-              Kelola &gt;
-            </Link>
+            <div>
+              <p className="text-xs text-stone-400">Total Member Terdaftar</p>
+              <h4 className="text-xl font-black text-white">{membersCount} Pengguna</h4>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 text-[10px] text-stone-500 pt-2 border-t border-stone-900">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Real-time Firebase Firestore • {statsLastUpdated || 'Aktif'}</span>
-          </div>
+          <Link to="/admin/members" className="text-xs text-amber-400 font-bold hover:underline">
+            Kelola &gt;
+          </Link>
         </div>
 
-        {/* Active Members Count */}
-        <div className="bg-stone-950 border border-stone-800 p-4 rounded-2xl flex flex-col justify-between space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-stone-900 rounded-xl text-emerald-400 border border-stone-800">
-                <CheckCircle2 className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xs text-stone-400">Member Aktif</p>
-                <h4 className="text-xl font-black text-emerald-400">{activeMembersCount} Akun</h4>
-              </div>
+        <div className="bg-stone-950 border border-stone-800 p-4 rounded-2xl flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-stone-900 rounded-xl text-amber-400 border border-stone-800">
+              <Award className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">
-              {membersCount > 0 ? `${Math.round((activeMembersCount / membersCount) * 100)}%` : '0%'}
-            </span>
-          </div>
-          <div className="text-[10px] text-stone-500 pt-2 border-t border-stone-900">
-            Definisi: Memiliki saldo poin atau bertransaksi 30 hari terakhir.
-          </div>
-        </div>
-
-        {/* Total Points in Circulation */}
-        <div className="bg-stone-950 border border-stone-800 p-4 rounded-2xl flex flex-col justify-between space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-stone-900 rounded-xl text-amber-400 border border-stone-800">
-                <Award className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xs text-stone-400">Total Poin Beredar</p>
-                <h4 className="text-xl font-black text-amber-400">{totalPointsInCirculation} Poin</h4>
-              </div>
+            <div>
+              <p className="text-xs text-stone-400">Total Poin Beredar</p>
+              <h4 className="text-xl font-black text-amber-400">{totalPointsInCirculation} Poin</h4>
             </div>
-            <Link to="/admin/points" className="text-xs text-amber-400 font-bold hover:underline">
-              Buku Besar &gt;
-            </Link>
           </div>
-          <div className="text-[10px] text-stone-500 pt-2 border-t border-stone-900">
-            Senilai {formatRupiah(totalPointsInCirculation * 100)} potensi diskon loyalitas.
-          </div>
+          <Link to="/admin/points" className="text-xs text-amber-400 font-bold hover:underline">
+            Buku Besar &gt;
+          </Link>
         </div>
       </div>
 
