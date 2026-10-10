@@ -93,12 +93,6 @@ export interface Order {
   createdAt: string;
   updatedAt: string;
   adminNotes?: string;
-  adminActionAt?: string;
-  lastAdminActionAt?: string;
-  cashReceived?: number;
-  cashChange?: number;
-  cashierUid?: string;
-  cashierName?: string;
 }
 
 export type PointTxType = 'reward' | 'redeem' | 'refund' | 'manual_adjustment';
@@ -166,69 +160,3 @@ export interface AdminLog {
   details: string;
   createdAt: string;
 }
-
-export interface PosTransactionItem {
-  productId: string;
-  productName: string;
-  variant: ProductVariantKey;
-  variantLabel: string;
-  unitPrice: number;
-  quantity: number;
-  subtotal: number;
-  notes?: string;
-}
-
-export interface PosTransaction {
-  id: string;
-  receiptNumber: string;
-  createdAt: string;
-  cashierUid: string;
-  cashierName: string;
-  cashierEmail: string;
-  customerName?: string;
-  customerMemberId?: string;
-  customerWhatsapp?: string;
-  items: PosTransactionItem[];
-  subtotal: number;
-  discount: number;
-  total: number;
-  paymentMethod: 'CASH' | 'QRIS';
-  paymentStatus: 'verified' | 'pending_verification';
-  cashReceived?: number;
-  cashChange?: number;
-  qrisRef?: string;
-  notes?: string;
-}
-
-export type CallStatus =
-  | 'idle'
-  | 'calling'
-  | 'ringing'
-  | 'connected'
-  | 'ended'
-  | 'rejected'
-  | 'failed'
-  | 'unanswered';
-
-export interface CallSession {
-  id: string;
-  chatId: string;
-  callerId: string;
-  callerName: string;
-  callerRole: 'admin' | 'customer';
-  calleeId: string;
-  calleeName: string;
-  orderId?: string;
-  status: CallStatus;
-  offer?: any;
-  answer?: any;
-  callerCandidates?: any[];
-  calleeCandidates?: any[];
-  startedAt?: string;
-  connectedAt?: string;
-  endedAt?: string;
-  durationSeconds?: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
