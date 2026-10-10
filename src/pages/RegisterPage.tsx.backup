@@ -46,12 +46,6 @@ export const RegisterPage: React.FC = () => {
         msg = 'Email tersebut sudah terdaftar. Silakan login atau gunakan email lain.';
       } else if (err.code === 'auth/invalid-email') {
         msg = 'Format alamat email tidak valid.';
-      } else if (err.code === 'auth/api-key-not-valid.-please-pass-a-valid-api-key.') {
-        msg = 'Firebase menolak API key. Pastikan API key Web App untuk project mycdc-7035a benar dan pembatasan API key mengizinkan localhost.';
-      } else if (err.code === 'auth/operation-not-allowed') {
-        msg = 'Login Email/Password belum diaktifkan di Firebase Authentication. Aktifkan provider Email/Password di Firebase Console.';
-      } else if (err.code === 'auth/network-request-failed') {
-        msg = 'Tidak dapat terhubung ke Firebase. Periksa koneksi internet HP/Termux.';
       }
       showToast(msg, 'error', 'Pendaftaran Gagal');
     } finally {

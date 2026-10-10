@@ -133,21 +133,21 @@ export const MenuPage: React.FC = () => {
       </div>
 
       {/* Products Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
         {products.map((item) => {
           const startingPrice = item.prices.tanpaNasi;
 
           return (
             <div
               key={item.id}
-              className="bg-white rounded-3xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+              className="bg-white rounded-2xl border border-stone-200 overflow-hidden bg-white shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
             >
               <div>
-                <div className="relative aspect-[4/3] w-full overflow-hidden bg-stone-100">
+                <div className="relative aspect-square w-full overflow-hidden bg-stone-100">
                   <img
                     src={item.imageUrl}
                     alt={item.name}
-                    className="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover object-center transition-transform duration-300"
                     loading="lazy"
                   />
                   {item.badge && (
@@ -160,32 +160,31 @@ export const MenuPage: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="p-5 space-y-2">
-                  <h3 className="font-extrabold text-lg text-stone-900">{item.name}</h3>
-                  <p className="text-xs text-stone-600 leading-relaxed min-h-[36px]">
+                <div className="p-3 space-y-1.5 sm:p-5 sm:space-y-2">
+                  <h3 className="line-clamp-1 text-sm font-extrabold text-stone-900 sm:text-lg">{item.name}</h3>
+                  <p className="hidden text-xs text-stone-600 leading-relaxed min-h-[36px] sm:block">
                     {item.description}
                   </p>
 
                   {/* Price Tag Preview */}
-                  <div className="pt-2 flex flex-wrap gap-1.5 text-[11px] font-semibold text-stone-600">
-                    <span className="px-2 py-0.5 rounded-lg bg-stone-100">
+                  <div className="pt-1 flex flex-wrap gap-1 text-[9px] font-semibold text-stone-600 sm:pt-2 sm:gap-1.5 sm:text-[11px]">
+                    <span className="px-1.5 py-0.5 rounded-lg bg-stone-100 sm:px-2">
                       {item.id === 'ori' ? 'Ori tanpa nasi' : `${item.name} tanpa nasi`}: <strong>{formatRupiah(item.prices.tanpaNasi)}</strong>
                     </span>
-                    <span className="px-2 py-0.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200">
+                    <span className="px-1.5 py-0.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 sm:px-2">
                       {item.id === 'ori' ? 'Ori + nasi' : `${item.name} + nasi`}: <strong>{formatRupiah(item.prices.denganNasi)}</strong>
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="p-5 pt-0">
+              <div className="p-3 pt-0 sm:p-5 sm:pt-0">
                 <button
                   type="button"
                   onClick={() => openCustomizer(item)}
-                  className="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-extrabold text-xs transition-colors flex items-center justify-center gap-2 shadow-sm"
+                  className="w-full rounded-xl bg-amber-500 px-2 py-2.5 text-[10px] font-extrabold text-stone-950 shadow-sm transition-colors hover:bg-amber-400 sm:px-4 sm:text-xs"
                 >
-                  <Plus className="w-4 h-4" />
-                  <span>Pesan Sekarang (Mulai {formatRupiah(startingPrice)})</span>
+                  <span>Pesan · {formatRupiah(startingPrice)}</span>
                 </button>
               </div>
             </div>
