@@ -181,14 +181,6 @@
     "/adminLogs/{logId}": {
       "schema": { "$ref": "#/entities/AdminLog" },
       "description": "Operational audit logs"
-    },
-    "/pos_transactions/{txId}": {
-      "schema": { "$ref": "#/entities/Order" },
-      "description": "Offline cashier transactions at physical outlet"
-    },
-    "/calls/{callId}": {
-      "schema": { "$ref": "#/entities/Chat" },
-      "description": "WebRTC voice call signaling session records"
     }
   }
 }
